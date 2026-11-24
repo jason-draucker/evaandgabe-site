@@ -1,0 +1,25 @@
+{
+  "posts": [
+    {
+      "id": "u-today",
+      "date": "2026-11-24",
+      "text": "Dad request: Dad needs his stats buddy from the house. To complete this task, a $100 Apple Pay to your phone when task completed is required.",
+      "image": "images/sat-buddy.jpg",
+      "alt": "Sat buddy",
+      "claimable": true,
+      "taskName": "SatBuddy",
+      "neededBy": "2026-11-24T22:00:00-07:00",
+      "neededByLabel": "SatBuddy needed by 10 PM tonight"
+    },
+    {
+      "id": "u2",
+      "date": "2026-11-22",
+      "text": "EXAMPLE: Hope you both had a good weekend. Love, Dad."
+    },
+    {
+      "id": "u3",
+      "date": "2026-11-20",
+      "text": "EXAMPLE: I'll try to make the game. Let me know if you need a ride."
+    }
+  ]
+}

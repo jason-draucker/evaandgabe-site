@@ -1,0 +1,27 @@
+# Free-tier Node web service for evaandgabe.com.
+# plan must stay "free". Do not change this to starter or any paid plan.
+services:
+  - type: web
+    name: evaandgabe-site
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DEMO_ONLY
+        value: "1"
+      - key: PIPER_EMAIL
+        value: piper@evaandgabe.com
+      - key: SUGGESTIONS_INBOX
+        value: piper@evaandgabe.com
+      - key: INBOUND_EMAIL_TOKEN
+        sync: false
+      - key: INBOUND_SECRET
+        sync: false
+      - key: EVA_TOKEN
+        sync: false
+      - key: GABE_TOKEN
+        sync: false
+      - key: ADMIN_PIN
+        sync: false

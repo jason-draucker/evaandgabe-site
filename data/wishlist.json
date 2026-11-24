@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "id": "w1",
+      "title": "EXAMPLE: Soccer cleats",
+      "for": "eva",
+      "status": "wanted",
+      "note": "Placeholder wish. Swap for a real item."
+    },
+    {
+      "id": "w2",
+      "title": "EXAMPLE: Watercolor set",
+      "for": "eva",
+      "status": "on_the_way",
+      "note": "Placeholder wish marked on the way."
+    },
+    {
+      "id": "w3",
+      "title": "EXAMPLE: Basketball",
+      "for": "gabe",
+      "status": "wanted",
+      "note": "Placeholder wish. Swap for a real item."
+    },
+    {
+      "id": "w4",
+      "title": "EXAMPLE: Science kit",
+      "for": "gabe",
+      "status": "got",
+      "note": "Placeholder wish marked got."
+    },
+    {
+      "id": "w5",
+      "title": "EXAMPLE: Family board game",
+      "for": "both",
+      "status": "wanted",
+      "note": "Placeholder shared wish."
+    }
+  ]
+}

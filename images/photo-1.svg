@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="t1 d1">
+  <title id="t1">Photo 1 placeholder</title>
+  <desc id="d1">Swap this file for a family photo.</desc>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d8c8"/>
+      <stop offset="1" stop-color="#e8d4b5"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#g1)"/>
+  <circle cx="200" cy="250" r="54" fill="#fffdf9" opacity="0.9"/>
+  <circle cx="320" cy="230" r="64" fill="#fffdf9"/>
+  <circle cx="440" cy="250" r="54" fill="#fffdf9" opacity="0.9"/>
+  <circle cx="200" cy="236" r="22" fill="#c4965a"/>
+  <circle cx="320" cy="214" r="26" fill="#b5532a"/>
+  <circle cx="440" cy="236" r="22" fill="#8e3f1f"/>
+  <text x="320" y="370" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#2a231c">Photo 1</text>
+  <text x="320" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#5c5248">Swap this image</text>
+</svg>

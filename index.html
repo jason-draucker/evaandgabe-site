@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eva &amp; Gabe</title>
+  <meta name="description" content="A simple family page for Eva and Gabe — calendars, a wish list, and a way to ask Dad.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="themes.css">
+</head>
+<body class="is-eva" data-eva-look="a" data-gabe-look="a">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="wordmark" href="#top">Eva &amp; Gabe</a>
+      <p class="header-tag">A place for our family</p>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap">
+        <p class="eyebrow">Hello</p>
+        <h1>Eva &amp; Gabe</h1>
+        <p class="lede">Calendars, a wish list, and a simple way to ask Dad.</p>
+      </div>
+    </section>
+
+    <section class="kids-section" aria-label="Kids' calendars and requests">
+      <div class="wrap">
+        <div class="tab-toolbar">
+          <div class="tablist" role="tablist" aria-label="Choose a kid">
+            <button class="tab is-active" id="tab-eva" role="tab" type="button" aria-selected="true" aria-controls="kid-panel" data-kid="eva">Eva</button>
+            <button class="tab" id="tab-gabe" role="tab" type="button" aria-selected="false" aria-controls="kid-panel" data-kid="gabe">Gabe</button>
+          </div>
+          <div class="action-row">
+            <button type="button" class="theme-btn" id="customize-btn">Customize</button>
+            <button type="button" class="theme-btn" id="change24-btn">24 hour change to website</button>
+          </div>
+        </div>
+
+        <div class="look-picker" id="look-picker">
+          <p class="look-label" id="look-label">Try another look</p>
+          <div class="look-swatches" id="look-swatches"></div>
+        </div>
+
+        <div class="kid-panel" id="kid-panel" role="tabpanel" aria-labelledby="tab-eva">
+          <div class="panel-grid">
+            <article class="card calendar-card">
+              <header class="card-head">
+                <p class="eyebrow" id="calendar-eyebrow">Eva's calendar</p>
+                <h2>What's coming up</h2>
+              </header>
+              <div class="cal-nav">
+                <button type="button" class="icon-btn" id="cal-prev" aria-label="Previous month">‹</button>
+                <h3 class="cal-month" id="cal-month">Month</h3>
+                <button type="button" class="icon-btn" id="cal-next" aria-label="Next month">›</button>
+              </div>
+              <div class="cal-grid" id="cal-grid" aria-live="polite"></div>
+              <div class="cal-day-detail" id="cal-day-detail" hidden></div>
+              <h3 class="list-heading">Upcoming</h3>
+              <ol class="upcoming" id="upcoming-list"></ol>
+
+              <form class="calendar-request-form" id="calendar-request-form">
+                <h3>Add something to my calendar</h3>
+                <p class="card-sub">Type what you want on the calendar and submit. It goes to the shared calendar inbox, and it should show up here in a moment.</p>
+                <div class="field">
+                  <label for="cal-req-date">Date</label>
+                  <input type="date" id="cal-req-date" name="date" required>
+                </div>
+                <div class="field">
+                  <label for="cal-req-text">What should go on the calendar?</label>
+                  <textarea id="cal-req-text" name="text" rows="3" maxlength="400" required placeholder="Practice, a game, a reminder…"></textarea>
+                </div>
+                <button type="submit" class="btn" id="cal-req-submit">Submit</button>
+                <p class="form-status" id="cal-req-status" role="status" hidden></p>
+              </form>
+            </article>
+
+            <article class="card request-card">
+              <header class="card-head">
+                <p class="eyebrow">Ask Dad</p>
+                <h2 id="request-heading">Eva, need something?</h2>
+                <p class="card-sub">Preset amounts text Dad. A typed note emails Dad.</p>
+              </header>
+              <form class="request-form" id="request-form" novalidate>
+                <input type="hidden" name="kid" id="request-kid" value="eva">
+
+                <fieldset class="preset-set">
+                  <legend>Text Dad a preset amount</legend>
+                  <div class="preset-row">
+                    <button type="button" class="preset-btn" data-amount="5">Dad, I need $5</button>
+                    <button type="button" class="preset-btn" data-amount="10">Dad, I need $10</button>
+                    <button type="button" class="preset-btn" data-amount="20">Dad, I need $20</button>
+                    <button type="button" class="preset-btn" data-amount="50">Dad, I need $50</button>
+                  </div>
+                </fieldset>
+
+                <div class="field">
+                  <label for="request-text">Or type a request (this emails Dad)</label>
+                  <textarea id="request-text" name="message" rows="4" maxlength="1000" placeholder="Hi Dad, I need…"></textarea>
+                </div>
+                <div class="consent" id="consent-box">
+                  <input type="checkbox" id="tcpa" name="tcpa" value="yes">
+                  <label for="tcpa">I consent to calls and texts, including automated or prerecorded calls, about this request. I understand a text or email will be sent to Dad. Consent is not required to look at this site, and I can change my mind anytime.</label>
+                </div>
+                <button type="submit" class="btn" id="email-dad-btn">Email this to Dad</button>
+                <p class="form-status" id="form-status" role="status" hidden></p>
+              </form>
+            </article>
+          </div>
+
+          <article class="card updates-card" id="dad-updates" aria-labelledby="updates-heading">
+            <header class="card-head">
+              <p class="eyebrow">From Dad</p>
+              <h2 id="updates-heading">Dad Updates</h2>
+              <p class="card-sub">The same notes appear on both tabs. Each one shows the date it came in, then the message.</p>
+            </header>
+            <ul class="update-list" id="update-list"></ul>
+            <p class="form-status" id="claim-status" role="status" hidden></p>
+          </article>
+
+          <article class="card completion-card" id="completion-record" aria-labelledby="completion-heading">
+            <header class="card-head">
+              <p class="eyebrow">Together</p>
+              <h2 id="completion-heading">Completion record</h2>
+              <p class="card-sub">Both tabs show every finished task from both kids. “Money sent” is a status on this page only — no real payment is sent.</p>
+            </header>
+            <ul class="completion-list" id="completion-list"></ul>
+            <div class="demo-tools">
+              <button type="button" class="btn btn-quiet" id="expire-claim-btn">Demo: end claim now</button>
+              <button type="button" class="btn btn-quiet" id="reset-tasks-btn">Demo: reset tasks</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="shared-section" aria-labelledby="photos-heading">
+      <div class="wrap">
+        <header class="section-intro">
+          <p class="eyebrow">Together</p>
+          <h2 id="photos-heading">Family photos</h2>
+          <p class="section-sub">Placeholder pictures for now. Swap the files in the images folder to use real photos.</p>
+        </header>
+        <ul class="photo-strip">
+          <li><figure><img src="images/photo-1.svg" alt="Placeholder family photo 1 — swap this image" width="640" height="480"><figcaption>Photo 1</figcaption></figure></li>
+          <li><figure><img src="images/photo-2.svg" alt="Placeholder family photo 2 — swap this image" width="640" height="480"><figcaption>Photo 2</figcaption></figure></li>
+          <li><figure><img src="images/photo-3.svg" alt="Placeholder family photo 3 — swap this image" width="640" height="480"><figcaption>Photo 3</figcaption></figure></li>
+          <li><figure><img src="images/photo-4.svg" alt="Placeholder family photo 4 — swap this image" width="640" height="480"><figcaption>Photo 4</figcaption></figure></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="wishlist-section" aria-labelledby="wishlist-heading">
+      <div class="wrap">
+        <header class="section-intro wishlist-head">
+          <div>
+            <p class="eyebrow">Wish list</p>
+            <h2 id="wishlist-heading">Things we'd love</h2>
+            <p class="section-sub">Dad can mark items as on the way or got. Example items are labeled so they are easy to replace.</p>
+          </div>
+          <div class="parent-tools">
+            <button type="button" class="btn btn-quiet" id="parent-unlock-btn">Parent tools</button>
+            <button type="button" class="btn btn-quiet" id="parent-lock-btn" hidden>Lock parent tools</button>
+          </div>
+        </header>
+        <div class="parent-panel card" id="parent-panel" hidden>
+          <h3>Add a wish</h3>
+          <form class="add-wish-form" id="add-wish-form">
+            <div class="field">
+              <label for="wish-title">Item</label>
+              <input type="text" id="wish-title" name="title" maxlength="120" required>
+            </div>
+            <div class="field">
+              <label for="wish-for">For</label>
+              <select id="wish-for" name="for">
+                <option value="eva">Eva</option>
+                <option value="gabe">Gabe</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            <button type="submit" class="btn">Add to list</button>
+          </form>
+        </div>
+        <ul class="wish-list" id="wish-list"></ul>
+        <p class="form-status" id="wish-status" role="status" hidden></p>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="pin-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+      <h2 id="pin-title">Parent tools</h2>
+      <p>Enter the parent PIN to mark wishes or add items. The prototype PIN is in the README.</p>
+      <form id="pin-form">
+        <div class="field">
+          <label for="pin-input">PIN</label>
+          <input type="password" id="pin-input" name="pin" inputmode="numeric" autocomplete="off" required>
+        </div>
+        <p class="form-status" id="pin-status" role="status" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-quiet" id="pin-cancel">Cancel</button>
+          <button type="submit" class="btn">Unlock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="suggest-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="suggest-title">
+      <h2 id="suggest-title">Customize</h2>
+      <p id="suggest-prompt">What else would you like to customize on your website?</p>
+      <form id="suggest-form">
+        <input type="hidden" id="suggest-kind" name="kind" value="customize">
+        <div class="field">
+          <label for="suggest-text" id="suggest-label">Your idea</label>
+          <textarea id="suggest-text" name="message" rows="5" maxlength="2000" required></textarea>
+        </div>
+        <p class="form-status" id="suggest-status" role="status" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-quiet" id="suggest-cancel">Cancel</button>
+          <button type="submit" class="btn" id="suggest-submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>&copy; <span id="year"></span> Eva &amp; Gabe</p>
+      <p class="footer-domain">evaandgabe.com</p>
+      <p class="private-links">Private calendar login (backup): <a href="/kid/eva">Eva</a> · <a href="/kid/gabe">Gabe</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

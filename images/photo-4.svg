@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="t4 d4">
+  <title id="t4">Photo 4 placeholder</title>
+  <desc id="d4">Swap this file for a family photo.</desc>
+  <defs>
+    <linearGradient id="g4" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f3ed"/>
+      <stop offset="1" stop-color="#f0d8c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#g4)"/>
+  <rect x="170" y="90" width="300" height="220" rx="16" fill="#fffdf9" stroke="#c4965a" stroke-width="6"/>
+  <path d="M190 280 L280 190 L340 240 L390 200 L450 280 Z" fill="#e8d4b5"/>
+  <circle cx="400" cy="160" r="22" fill="#b5532a"/>
+  <text x="320" y="370" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#2a231c">Photo 4</text>
+  <text x="320" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#5c5248">Swap this image</text>
+</svg>

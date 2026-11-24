@@ -1,0 +1,15 @@
+node_modules/
+.env
+data/wishlist-store.json
+published-site/
+*.log
+.DS_Store
+data/updates-store.json
+data/events-store.json
+data/suggestions-store.json
+data/calendar-requests-store.json
+data/tasks-store.json
+
+# Large local previews and archives; not needed to run the site
+preview-desktop.png
+evaandgabe-site-prototype.zip
