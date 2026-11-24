@@ -16,25 +16,25 @@ body.is-eva[data-eva-look="a"] .kids-section::after {
 }
 body.is-eva[data-eva-look="a"] .kids-section::before { top: 0.4rem; left: 0.8rem; }
 body.is-eva[data-eva-look="a"] .kids-section::after { top: 0.5rem; right: 0.9rem; transform: scaleX(-1); }
-body.is-eva[data-eva-look="a"] { --accent: #c45c78; --accent-dark: #9a3f5c; --accent-soft: #f6d5de; --gold: #d4a0b0; }
+body.is-eva[data-eva-look="a"] .kids-section { --accent: #c45c78; --accent-dark: #9a3f5c; --accent-soft: #f6d5de; --gold: #d4a0b0; }
 
 /* Eva B — lavender wildflowers */
 body.is-eva[data-eva-look="b"] .kids-section {
   background: linear-gradient(180deg, #f3eafc 0%, #e4d7f5 100%);
 }
-body.is-eva[data-eva-look="b"] { --accent: #7a4aa8; --accent-dark: #5c357f; --accent-soft: #e8d7f8; --gold: #b392d4; }
+body.is-eva[data-eva-look="b"] .kids-section { --accent: #7a4aa8; --accent-dark: #5c357f; --accent-soft: #e8d7f8; --gold: #b392d4; }
 
 /* Eva C — peach daisies */
 body.is-eva[data-eva-look="c"] .kids-section {
   background: linear-gradient(180deg, #fff3e8 0%, #f8dcc8 100%);
 }
-body.is-eva[data-eva-look="c"] { --accent: #d36b3a; --accent-dark: #a04d26; --accent-soft: #fde0cd; --gold: #e8b07a; }
+body.is-eva[data-eva-look="c"] .kids-section { --accent: #d36b3a; --accent-dark: #a04d26; --accent-soft: #fde0cd; --gold: #e8b07a; }
 
 /* Eva D — cherry blossoms on soft blue */
 body.is-eva[data-eva-look="d"] .kids-section {
   background: linear-gradient(180deg, #eef6fd 0%, #d7e8f7 100%);
 }
-body.is-eva[data-eva-look="d"] { --accent: #4a7cb5; --accent-dark: #315a89; --accent-soft: #d5e6f6; --gold: #e8a0b8; }
+body.is-eva[data-eva-look="d"] .kids-section { --accent: #4a7cb5; --accent-dark: #315a89; --accent-soft: #d5e6f6; --gold: #e8a0b8; }
 
 /* Gabe A — classic dark blue/black (default) */
 body.is-gabe[data-gabe-look="a"] .kids-section {
@@ -69,12 +69,12 @@ body.is-gabe[data-gabe-look="a"] .kids-section .wordmark { color: #f3f6fb; }
 body.is-gabe[data-gabe-look="a"] .kids-section { font-family: "Rajdhani", "Source Sans 3", sans-serif; }
 body.is-gabe[data-gabe-look="a"] .kids-section h2,
 body.is-gabe[data-gabe-look="a"] .kids-section h3 { font-family: "Rajdhani", sans-serif; letter-spacing: 0.02em; }
-body.is-gabe[data-gabe-look="a"] { --accent: #0070d1; --accent-dark: #004e99; --accent-soft: #16385f; --gold: #00a2ff; --ink: #e8eef6; --ink-soft: #b7c3d6; --line: #2a3550; --bg: #12141c; --surface: #171a24; }
-body.is-gabe[data-gabe-look="a"] .tab.is-active[data-kid="gabe"] { background: #0070d1; color: #fff; }
-body.is-gabe[data-gabe-look="a"] .btn { background: #0070d1; box-shadow: 0 0 16px rgba(0, 112, 209, 0.35); }
-body.is-gabe[data-gabe-look="a"] .look-label,
-body.is-gabe[data-gabe-look="a"] .card-sub,
-body.is-gabe[data-gabe-look="a"] .section-sub { color: #b7c3d6; }
+body.is-gabe[data-gabe-look="a"] .kids-section { --accent: #0070d1; --accent-dark: #004e99; --accent-soft: #16385f; --gold: #00a2ff; --ink: #e8eef6; --ink-soft: #b7c3d6; --line: #2a3550; --bg: #12141c; --surface: #171a24; }
+body.is-gabe[data-gabe-look="a"] .kids-section .tab.is-active[data-kid="gabe"] { background: #0070d1; color: #fff; }
+body.is-gabe[data-gabe-look="a"] .kids-section .btn { background: #0070d1; box-shadow: 0 0 16px rgba(0, 112, 209, 0.35); }
+body.is-gabe[data-gabe-look="a"] .kids-section .look-label,
+body.is-gabe[data-gabe-look="a"] .kids-section .card-sub,
+body.is-gabe[data-gabe-look="a"] .kids-section .section-sub { color: #b7c3d6; }
 body.is-gabe[data-gabe-look="a"] .kids-section::after {
   content: "";
   position: absolute; right: 1.1rem; top: 0.7rem; width: 86px; height: 52px;
@@ -92,18 +92,18 @@ body.is-gabe[data-gabe-look="b"] .kids-section {
   background: linear-gradient(180deg, #ececef 0%, #1a1a1f 58%);
   color: #111;
 }
-body.is-gabe[data-gabe-look="b"] { --accent: #1a1a1f; --accent-dark: #000; --gold: #0070d1; }
+body.is-gabe[data-gabe-look="b"] .kids-section { --accent: #1a1a1f; --accent-dark: #000; --gold: #0070d1; }
 
 /* Gabe C — bright face-button colors on black */
 body.is-gabe[data-gabe-look="c"] .kids-section { background: #0a0a0d; color: #fff; }
-body.is-gabe[data-gabe-look="c"] { --accent: #e74c3c; --accent-dark: #c0392b; --gold: #2ecc71; --ink: #fff; }
+body.is-gabe[data-gabe-look="c"] .kids-section { --accent: #e74c3c; --accent-dark: #c0392b; --gold: #2ecc71; --ink: #fff; }
 
 /* Gabe D — navy with glow */
 body.is-gabe[data-gabe-look="d"] .kids-section {
   background: radial-gradient(circle at 50% 0%, rgba(0, 220, 255, 0.28), transparent 42%), #0a1628;
   color: #e8f6ff;
 }
-body.is-gabe[data-gabe-look="d"] { --accent: #00d4ff; --accent-dark: #0891b2; --gold: #67e8f9; }
+body.is-gabe[data-gabe-look="d"] .kids-section { --accent: #00d4ff; --accent-dark: #0891b2; --gold: #67e8f9; }
 
 .completion-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .completion-list li, .empty-note { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.85rem; }
@@ -111,3 +111,7 @@ body.is-gabe[data-gabe-look="d"] { --accent: #00d4ff; --accent-dark: #0891b2; --
 .deadline, .claim-meta, .countdown { font-weight: 700; font-size: 0.92rem; }
 .demo-tools { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.85rem; }
 .update-claim-msg { margin: 0.5rem 0 0; font-weight: 700; }
+
+body.is-gabe[data-gabe-look="a"] .tab-toolbar {
+  padding-right: 108px;
+}
