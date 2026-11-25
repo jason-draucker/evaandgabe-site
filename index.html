@@ -8,10 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Quicksand:wght@500;700&family=Pacifico&family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;600;700&family=Lora:wght@500;600&family=Comfortaa:wght@500;700&family=Caveat:wght@600;700&family=Montserrat:wght@400;600;700&family=Josefin+Sans:wght@400;600;700&family=DM+Serif+Display&family=Abril+Fatface&family=Baloo+2:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Permanent+Marker&family=Orbitron:wght@600;800&family=Bebas+Neue&family=Oswald:wght@500;600&family=Russo+One&family=Teko:wght@500;600&family=Black+Ops+One&family=Bungee&family=Lilita+One&family=Press+Start+2P&family=Exo+2:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="themes.css">
 </head>
-<body class="is-eva" data-eva-look="a" data-gabe-look="a">
+<body class="is-eva">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
@@ -25,13 +27,20 @@
     <section class="hero" id="top">
       <div class="wrap">
         <p class="eyebrow">Hello</p>
-        <h1>Eva &amp; Gabe</h1>
+        <h1 class="hero-title"><button type="button" class="hero-kid is-active" id="hero-eva" data-kid="eva" aria-pressed="true" aria-controls="kid-panel">Eva</button><span class="hero-slash" aria-hidden="true"> / </span><button type="button" class="hero-kid" id="hero-gabe" data-kid="gabe" aria-pressed="false" aria-controls="kid-panel">Gabe</button></h1>
         <p class="lede">Calendars, a wish list, and a simple way to ask Dad.</p>
       </div>
     </section>
 
     <section class="kids-section" aria-label="Kids' calendars and requests">
+      <div class="skin-motif" id="skin-motif" aria-hidden="true"></div>
       <div class="wrap">
+        <div class="design-corner">
+          <button type="button" class="design-btn" id="design-btn" aria-haspopup="dialog" aria-controls="skin-modal">
+            <span class="design-btn-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>Try a different design</span>
+          </button>
+        </div>
         <div class="tab-toolbar">
           <div class="tablist" role="tablist" aria-label="Choose a kid">
             <button class="tab is-active" id="tab-eva" role="tab" type="button" aria-selected="true" aria-controls="kid-panel" data-kid="eva">Eva</button>
@@ -43,10 +52,6 @@
           </div>
         </div>
 
-        <div class="look-picker" id="look-picker">
-          <p class="look-label" id="look-label">Try another look</p>
-          <div class="look-swatches" id="look-swatches"></div>
-        </div>
 
         <div class="kid-panel" id="kid-panel" role="tabpanel" aria-labelledby="tab-eva">
           <div class="panel-grid">
@@ -103,6 +108,7 @@
                 <div class="field">
                   <label for="request-text">Or type a request (this emails Dad)</label>
                   <textarea id="request-text" name="message" rows="4" maxlength="1000" placeholder="Hi Dad, I need…"></textarea>
+                  <p class="color-status" id="color-status" role="status" aria-live="polite" hidden><span id="color-status-text"></span> <button type="button" class="btn-quiet color-undo" id="color-undo">Undo colors</button></p>
                 </div>
                 <div class="consent" id="consent-box">
                   <input type="checkbox" id="tcpa" name="tcpa" value="yes">
@@ -230,6 +236,19 @@
     </div>
   </div>
 
+  <div class="modal skin-modal" id="skin-modal" hidden>
+    <div class="modal-card skin-modal-card" role="dialog" aria-modal="true" aria-labelledby="skin-title" aria-describedby="skin-sub">
+      <div class="skin-modal-head">
+        <div>
+          <h2 id="skin-title">Pick a design</h2>
+          <p id="skin-sub"><span id="skin-count">40</span> designs. Tap one to use it right away. Press Esc to close.</p>
+        </div>
+        <button type="button" class="skin-close" id="skin-close" aria-label="Close design picker">&times;</button>
+      </div>
+      <ul class="skin-grid" id="skin-grid" aria-label="Designs"></ul>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="wrap footer-inner">
       <p>&copy; <span id="year"></span> Eva &amp; Gabe</p>
@@ -238,6 +257,8 @@
     </div>
   </footer>
 
+  <script src="skins.js"></script>
+  <script src="color-request.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

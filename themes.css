@@ -1,109 +1,200 @@
-/* Eva floral looks and Gabe game-style looks. Artwork is original — not official Sony marks. */
-.kids-section { position: relative; border-radius: 24px; padding: 1.1rem 0 1.6rem; transition: background 0.25s, color 0.25s; }
+/* Eva & Gabe skins. Values come from skins.js and are set as --sk-* custom properties
+   on .kids-section by app.js. Artwork is original CSS: gradients and generic shapes only.
+   No official Sony/PlayStation or Supercell/Clash Royale logos, characters, or images. */
+.kids-section {
+  position: relative;
+  border-radius: 24px;
+  padding: 1.1rem 0 1.6rem;
+  transition: background 0.25s, color 0.25s;
+  background: var(--sk-bg, linear-gradient(180deg, #fdeef2 0%, #f7e4ea 100%));
+  --surface: var(--sk-surface, #fffdfb);
+  --bg: var(--sk-bg2, #fffdfb);
+  --ink: var(--sk-ink, #2a231c);
+  --ink-soft: var(--sk-soft, #5c5248);
+  --line: var(--sk-line, #f0c8d2);
+  --accent: var(--sk-accent, #c45c78);
+  --accent-dark: var(--sk-accent-dark, #9a3f5c);
+  --accent-soft: var(--sk-accent-soft, #f6d5de);
+  --gold: var(--sk-gold, #d4a0b0);
+  --eva: var(--sk-accent, #c45c78);
+  --gabe: var(--sk-accent, #c45c78);
+  --eva-soft: var(--sk-accent-soft, #f6d5de);
+  --gabe-soft: var(--sk-accent-soft, #f6d5de);
+  --radius: var(--sk-radius, 16px);
+  --font-display: var(--sk-head, "Fraunces", Georgia, serif);
+  --font-body: var(--sk-body, "Source Sans 3", system-ui, sans-serif);
+  --on-accent: var(--sk-on-accent, #ffffff);
+  color: var(--ink);
+  font-family: var(--font-body);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.kids-section h1, .kids-section h2, .kids-section h3, .kids-section .cal-month { color: var(--ink); }
+.kids-section .btn,
+.kids-section .tab.is-active[data-kid],
+.kids-section .cal-day.is-selected { background: var(--accent); color: var(--on-accent); }
+.kids-section .btn { box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent); border-radius: min(var(--radius), 999px); }
+.kids-section .tablist,
+.kids-section .theme-btn,
+.kids-section .icon-btn,
+.kids-section .field input,
+.kids-section .field textarea,
+.kids-section .field select { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.kids-section .preset-btn,
+.kids-section .consent { color: var(--ink); }
+body[data-skin-dark="true"] .kids-section .cal-day.is-muted { color: color-mix(in srgb, var(--ink) 40%, transparent); }
+body[data-skin-dark="true"] .kids-section .field input,
+body[data-skin-dark="true"] .kids-section .field textarea { background: var(--bg); color-scheme: dark; }
 
-/* Eva A — blush roses (default) */
-body.is-eva[data-eva-look="a"] .kids-section {
-  background:
-    radial-gradient(circle at 12% 18%, #f8c9d4 0, transparent 32%),
-    radial-gradient(circle at 92% 8%, #f3d6c8 0, transparent 28%),
-    linear-gradient(180deg, #fdeef2 0%, #f7e4ea 100%);
-  box-shadow: inset 0 0 0 1px #f0c8d2;
+/* Card styles */
+body[data-skin-card="flat"] .kids-section .card { box-shadow: none; border-color: transparent; }
+body[data-skin-card="outline"] .kids-section .card { box-shadow: none; border: 2px solid var(--accent); }
+body[data-skin-card="glass"] .kids-section .card {
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }
-body.is-eva[data-eva-look="a"] .kids-section::before,
-body.is-eva[data-eva-look="a"] .kids-section::after {
-  content: "✿";
-  position: absolute; font-size: 2.4rem; color: #e38aa0; opacity: 0.55; pointer-events: none;
+body[data-skin-card="frame"] .kids-section .card {
+  border: 3px solid var(--gold);
+  box-shadow: inset 0 0 0 3px var(--accent-dark), 0 6px 0 var(--accent-dark), 0 12px 20px rgba(0, 0, 0, 0.28);
 }
-body.is-eva[data-eva-look="a"] .kids-section::before { top: 0.4rem; left: 0.8rem; }
-body.is-eva[data-eva-look="a"] .kids-section::after { top: 0.5rem; right: 0.9rem; transform: scaleX(-1); }
-body.is-eva[data-eva-look="a"] .kids-section { --accent: #c45c78; --accent-dark: #9a3f5c; --accent-soft: #f6d5de; --gold: #d4a0b0; }
+body[data-skin-card="neon"] .kids-section .card {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent), 0 0 24px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+body[data-skin-card="paper"] .kids-section .card { border: 1px solid var(--line); box-shadow: 5px 5px 0 var(--accent-soft); }
+body[data-skin-card="brutal"] .kids-section .card { border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+body[data-skin-card="brutal"] .kids-section .btn { border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
 
-/* Eva B — lavender wildflowers */
-body.is-eva[data-eva-look="b"] .kids-section {
-  background: linear-gradient(180deg, #f3eafc 0%, #e4d7f5 100%);
+/* Card header styles */
+body[data-skin-head="band"] .kids-section .card-head,
+body[data-skin-head="banner"] .kids-section .card-head {
+  margin: -1.25rem -1.25rem 1rem;
+  padding: 0.9rem 1.25rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: calc(var(--radius) - 3px) calc(var(--radius) - 3px) 0 0;
 }
-body.is-eva[data-eva-look="b"] .kids-section { --accent: #7a4aa8; --accent-dark: #5c357f; --accent-soft: #e8d7f8; --gold: #b392d4; }
+body[data-skin-head="banner"] .kids-section .card-head {
+  background: linear-gradient(180deg, var(--gold) 0%, var(--accent) 100%);
+  border-bottom: 3px solid var(--accent-dark);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+}
+body[data-skin-head="band"] .kids-section .card-head h2,
+body[data-skin-head="band"] .kids-section .card-head .eyebrow,
+body[data-skin-head="band"] .kids-section .card-head .card-sub,
+body[data-skin-head="banner"] .kids-section .card-head h2,
+body[data-skin-head="banner"] .kids-section .card-head .eyebrow,
+body[data-skin-head="banner"] .kids-section .card-head .card-sub { color: inherit; }
+body[data-skin-head="underline"] .kids-section .card-head { border-bottom: 3px solid var(--accent); padding-bottom: 0.6rem; }
+body[data-skin-head="pill"] .kids-section .card-head .eyebrow {
+  display: inline-block; background: var(--accent-soft); color: var(--accent-dark);
+  padding: 0.15rem 0.75rem; border-radius: 999px;
+}
+body[data-skin-upper="true"] .kids-section h2,
+body[data-skin-upper="true"] .kids-section h3,
+body[data-skin-upper="true"] .kids-section .tab { text-transform: uppercase; letter-spacing: 0.04em; }
 
-/* Eva C — peach daisies */
-body.is-eva[data-eva-look="c"] .kids-section {
-  background: linear-gradient(180deg, #fff3e8 0%, #f8dcc8 100%);
+/* Top-right "Try a different design" corner */
+.design-corner { display: flex; justify-content: flex-end; margin: 0 0 0.6rem; position: relative; z-index: 2; }
+.design-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 44px; padding: 0.45rem 1rem;
+  border: 2px solid var(--accent); border-radius: 999px;
+  background: var(--surface); color: var(--ink);
+  font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 25%, transparent);
 }
-body.is-eva[data-eva-look="c"] .kids-section { --accent: #d36b3a; --accent-dark: #a04d26; --accent-soft: #fde0cd; --gold: #e8b07a; }
+.design-btn:hover { background: var(--accent); color: var(--on-accent); }
+.design-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.design-btn-dots { display: inline-flex; gap: 3px; }
+.design-btn-dots i { width: 9px; height: 9px; border-radius: 50%; display: block; }
+.design-btn-dots i:nth-child(1) { background: var(--accent); }
+.design-btn-dots i:nth-child(2) { background: var(--gold); }
+.design-btn-dots i:nth-child(3) { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--line); }
 
-/* Eva D — cherry blossoms on soft blue */
-body.is-eva[data-eva-look="d"] .kids-section {
-  background: linear-gradient(180deg, #eef6fd 0%, #d7e8f7 100%);
-}
-body.is-eva[data-eva-look="d"] .kids-section { --accent: #4a7cb5; --accent-dark: #315a89; --accent-soft: #d5e6f6; --gold: #e8a0b8; }
+/* Decorative motif (top-left of the kid area, behind content) */
+.skin-motif { position: absolute; top: 0.55rem; left: 0.9rem; display: flex; gap: 0.45rem; align-items: center; pointer-events: none; opacity: 0.8; z-index: 1; color: var(--accent); font-size: 1.6rem; line-height: 1; }
+.skin-motif:empty { display: none; }
+.skin-motif .g { display: inline-block; }
+.skin-motif .g:nth-child(2) { color: var(--gold); font-size: 0.75em; }
+.skin-motif .g:nth-child(3) { opacity: 0.7; }
+@media (max-width: 640px) { .skin-motif { font-size: 1.2rem; } }
 
-/* Gabe A — classic dark blue/black (default) */
-body.is-gabe[data-gabe-look="a"] .kids-section {
-  background:
-    radial-gradient(circle at 80% 0%, rgba(0, 112, 209, 0.35), transparent 40%),
-    linear-gradient(180deg, #14141c 0%, #0b0b12 100%);
-  color: #e8eef6;
-  box-shadow: 0 0 0 1px #1c2a44, 0 0 40px rgba(0, 112, 209, 0.18);
-}
-body.is-gabe[data-gabe-look="a"] .kids-section .card,
-body.is-gabe[data-gabe-look="a"] .kids-section .tablist,
-body.is-gabe[data-gabe-look="a"] .theme-btn,
-body.is-gabe[data-gabe-look="a"] .look-swatch,
-body.is-gabe[data-gabe-look="a"] .upcoming li,
-body.is-gabe[data-gabe-look="a"] .update-list li,
-body.is-gabe[data-gabe-look="a"] .completion-list li,
-body.is-gabe[data-gabe-look="a"] .consent,
-body.is-gabe[data-gabe-look="a"] .field input,
-body.is-gabe[data-gabe-look="a"] .field textarea,
-body.is-gabe[data-gabe-look="a"] .preset-btn,
-body.is-gabe[data-gabe-look="a"] .icon-btn {
-  background: #171a24;
-  border-color: #2a3550;
-  color: #e8eef6;
-}
-body.is-gabe[data-gabe-look="a"] .kids-section,
-body.is-gabe[data-gabe-look="a"] .kids-section h1,
-body.is-gabe[data-gabe-look="a"] .kids-section h2,
-body.is-gabe[data-gabe-look="a"] .kids-section h3,
-body.is-gabe[data-gabe-look="a"] .kids-section .cal-month,
-body.is-gabe[data-gabe-look="a"] .kids-section .wordmark { color: #f3f6fb; }
-body.is-gabe[data-gabe-look="a"] .kids-section { font-family: "Rajdhani", "Source Sans 3", sans-serif; }
-body.is-gabe[data-gabe-look="a"] .kids-section h2,
-body.is-gabe[data-gabe-look="a"] .kids-section h3 { font-family: "Rajdhani", sans-serif; letter-spacing: 0.02em; }
-body.is-gabe[data-gabe-look="a"] .kids-section { --accent: #0070d1; --accent-dark: #004e99; --accent-soft: #16385f; --gold: #00a2ff; --ink: #e8eef6; --ink-soft: #b7c3d6; --line: #2a3550; --bg: #12141c; --surface: #171a24; }
-body.is-gabe[data-gabe-look="a"] .kids-section .tab.is-active[data-kid="gabe"] { background: #0070d1; color: #fff; }
-body.is-gabe[data-gabe-look="a"] .kids-section .btn { background: #0070d1; box-shadow: 0 0 16px rgba(0, 112, 209, 0.35); }
-body.is-gabe[data-gabe-look="a"] .kids-section .look-label,
-body.is-gabe[data-gabe-look="a"] .kids-section .card-sub,
-body.is-gabe[data-gabe-look="a"] .kids-section .section-sub { color: #b7c3d6; }
-body.is-gabe[data-gabe-look="a"] .kids-section::after {
-  content: "";
-  position: absolute; right: 1.1rem; top: 0.7rem; width: 86px; height: 52px;
-  background:
-    radial-gradient(circle at 22% 58%, #0070d1 4px, transparent 5px),
-    radial-gradient(circle at 40% 40%, #2ecc71 4px, transparent 5px),
-    radial-gradient(circle at 58% 40%, #e74c3c 4px, transparent 5px),
-    radial-gradient(circle at 76% 58%, #f1c40f 4px, transparent 5px);
-  border: 2px solid #3a4660; border-radius: 16px 16px 20px 20px; opacity: 0.85; pointer-events: none;
-}
+/* CSS-drawn controller shapes (generic circle / cross / square / triangle) */
+.m-shape { position: relative; display: inline-block; width: 18px; height: 18px; }
+.m-circle { border: 3px solid #e74c3c; border-radius: 50%; }
+.m-square { border: 3px solid #e86fc5; border-radius: 2px; width: 17px; height: 17px; }
+.m-cross::before, .m-cross::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22px; height: 3px; background: #4b8ff0; border-radius: 2px; }
+.m-cross::before { transform: translate(-50%, -50%) rotate(45deg); }
+.m-cross::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.m-triangle { width: 21px; background: #2ecc71; clip-path: polygon(evenodd, 50% 0, 100% 100%, 0 100%, 50% 0, 50% 30%, 19% 85%, 81% 85%, 50% 30%); }
 
-/* Gabe B — light/dark two-tone */
-body.is-gabe[data-gabe-look="b"] .kids-section {
-  background: linear-gradient(180deg, #efefx2 0%, #1b1b20 55%);
-  background: linear-gradient(180deg, #ececef 0%, #1a1a1f 58%);
-  color: #111;
-}
-body.is-gabe[data-gabe-look="b"] .kids-section { --accent: #1a1a1f; --accent-dark: #000; --gold: #0070d1; }
+/* CSS-drawn arena shapes (generic crown / drop / shield) */
+.m-crown { width: 26px; height: 20px; background: linear-gradient(180deg, #ffe066, #e0a400); clip-path: polygon(0 100%, 0 25%, 25% 60%, 50% 0, 75% 60%, 100% 25%, 100% 100%); }
+.m-drop { width: 16px; height: 16px; margin: 0 3px; background: linear-gradient(135deg, #ff7ae0, #a23cff); border-radius: 50% 0 50% 50%; transform: rotate(-45deg); }
+.m-shield { width: 20px; height: 22px; background: linear-gradient(90deg, #2a6fdb 50%, #d63a3a 50%); clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
+.m-ball { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, transparent 0 9px, #1a1a1a 9px 10px, transparent 10px) , linear-gradient(90deg, transparent 10px, #1a1a1a 10px 12px, transparent 12px), linear-gradient(0deg, transparent 10px, #1a1a1a 10px 12px, transparent 12px), #f26b1d; }
+.m-bolt { width: 16px; height: 24px; background: var(--gold); clip-path: polygon(60% 0, 0 58%, 42% 58%, 30% 100%, 100% 38%, 56% 38%); }
+.m-pixel { width: 6px; height: 6px; background: transparent; box-shadow: 6px 0 var(--accent), 18px 0 var(--accent), 0 6px var(--accent), 6px 6px var(--accent), 12px 6px var(--accent), 18px 6px var(--accent), 24px 6px var(--accent), 0 12px var(--accent), 12px 12px var(--accent), 24px 12px var(--accent), 6px 18px var(--accent), 18px 18px var(--accent); margin-right: 26px; }
 
-/* Gabe C — bright face-button colors on black */
-body.is-gabe[data-gabe-look="c"] .kids-section { background: #0a0a0d; color: #fff; }
-body.is-gabe[data-gabe-look="c"] .kids-section { --accent: #e74c3c; --accent-dark: #c0392b; --gold: #2ecc71; --ink: #fff; }
-
-/* Gabe D — navy with glow */
-body.is-gabe[data-gabe-look="d"] .kids-section {
-  background: radial-gradient(circle at 50% 0%, rgba(0, 220, 255, 0.28), transparent 42%), #0a1628;
-  color: #e8f6ff;
+/* Skin picker window */
+.skin-modal { align-items: start; overflow-y: auto; }
+.skin-modal-card {
+  width: min(1040px, 100%); max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  background: #fffdfb; color: #2a231c; font-family: "Source Sans 3", system-ui, sans-serif;
 }
-body.is-gabe[data-gabe-look="d"] .kids-section { --accent: #00d4ff; --accent-dark: #0891b2; --gold: #67e8f9; }
+.skin-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid #eadfd3; }
+.skin-modal-head h2 { margin: 0; font-size: 1.35rem; color: #2a231c; }
+.skin-modal-head p { margin: 0.2rem 0 0; color: #5c5248; font-size: 0.95rem; }
+.skin-close { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #e0d4c6; background: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer; color: #2a231c; }
+.skin-close:focus-visible { outline: 3px solid #2e6bff; outline-offset: 2px; }
+.skin-grid {
+  list-style: none; margin: 0; padding: 1rem 1.25rem 1.25rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.85rem;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+}
+@media (max-width: 520px) { .skin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; padding: 0.75rem; } }
+.skin-option {
+  display: flex; flex-direction: column; gap: 0.35rem; width: 100%; padding: 0.4rem;
+  border: 2px solid transparent; border-radius: 14px; background: #f7f2ec; cursor: pointer; text-align: left; color: #2a231c;
+}
+.skin-option:hover { border-color: #cdbfae; }
+.skin-option:focus-visible { outline: 3px solid #2e6bff; outline-offset: 2px; }
+.skin-option[aria-pressed="true"] { border-color: #2e6bff; background: #eaf0ff; }
+.skin-name { font-weight: 700; font-size: 0.88rem; line-height: 1.2; }
+.skin-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #5c5248; }
+.skin-current-note { font-size: 0.7rem; font-weight: 700; color: #2e6bff; }
+
+/* Mini rendered preview inside each thumbnail */
+.skin-thumb {
+  position: relative; display: block; height: 96px; border-radius: 10px; overflow: hidden;
+  background: var(--sk-bg); color: var(--sk-ink); font-family: var(--sk-body);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.skin-thumb .t-bar { position: absolute; top: 8px; right: 8px; left: 38%; height: 14px; border-radius: 999px; background: var(--sk-surface); box-shadow: inset 0 0 0 1px var(--sk-line); }
+.skin-thumb .t-bar::after { content: ""; position: absolute; left: 3px; top: 3px; bottom: 3px; width: 45%; border-radius: 999px; background: var(--sk-accent); }
+.skin-thumb .t-card { position: absolute; bottom: 8px; height: 58px; background: var(--sk-surface); border: 1px solid var(--sk-line); border-radius: min(var(--sk-radius), 12px); overflow: hidden; }
+.skin-thumb .t-card.a { left: 8px; width: 56%; }
+.skin-thumb .t-card.b { right: 8px; width: 30%; }
+.skin-thumb .t-head { display: block; height: 14px; margin: 5px 6px 0; font-family: var(--sk-head); font-size: 12px; line-height: 14px; font-weight: 700; color: var(--sk-ink); white-space: nowrap; overflow: hidden; }
+.skin-thumb .t-line { display: block; height: 4px; margin: 5px 6px 0; border-radius: 2px; background: var(--sk-soft); opacity: 0.45; }
+.skin-thumb .t-line.short { width: 55%; }
+.skin-thumb .t-btn { display: block; width: 46%; height: 9px; margin: 6px 6px 0; border-radius: 999px; background: var(--sk-accent); }
+.skin-thumb .t-dot { display: block; width: 14px; height: 14px; margin: 6px auto 0; border-radius: 50%; background: var(--sk-gold); }
+.skin-thumb[data-card="outline"] .t-card { border: 2px solid var(--sk-accent); }
+.skin-thumb[data-card="frame"] .t-card { border: 2px solid var(--sk-gold); box-shadow: inset 0 0 0 2px var(--sk-accent-dark), 0 3px 0 var(--sk-accent-dark); }
+.skin-thumb[data-card="neon"] .t-card { border-color: var(--sk-accent); box-shadow: 0 0 8px var(--sk-accent); }
+.skin-thumb[data-card="brutal"] .t-card { border: 2px solid var(--sk-ink); box-shadow: 3px 3px 0 var(--sk-ink); }
+.skin-thumb[data-card="paper"] .t-card { box-shadow: 3px 3px 0 var(--sk-accent-soft); }
+.skin-thumb[data-card="glass"] .t-card { backdrop-filter: blur(4px); }
+.skin-thumb[data-head="band"] .t-card.a .t-head,
+.skin-thumb[data-head="banner"] .t-card.a .t-head { margin: 0; padding: 2px 6px; height: 18px; background: var(--sk-accent); color: var(--sk-on-accent); }
+.skin-thumb[data-head="banner"] .t-card.a .t-head { background: linear-gradient(180deg, var(--sk-gold), var(--sk-accent)); color: #fff; }
+.skin-thumb[data-head="underline"] .t-card.a .t-head { border-bottom: 2px solid var(--sk-accent); }
+.skin-thumb[data-upper="true"] .t-head { text-transform: uppercase; }
+.skin-thumb .t-motif { position: absolute; top: 6px; left: 7px; transform: scale(0.6); transform-origin: top left; display: flex; gap: 4px; color: var(--sk-accent); font-size: 1.3rem; line-height: 1; }
 
 .completion-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .completion-list li, .empty-note { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.85rem; }
@@ -111,7 +202,11 @@ body.is-gabe[data-gabe-look="d"] .kids-section { --accent: #00d4ff; --accent-dar
 .deadline, .claim-meta, .countdown { font-weight: 700; font-size: 0.92rem; }
 .demo-tools { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.85rem; }
 .update-claim-msg { margin: 0.5rem 0 0; font-weight: 700; }
-
-body.is-gabe[data-gabe-look="a"] .tab-toolbar {
-  padding-right: 108px;
-}
+.skin-thumb { --accent: var(--sk-accent); --gold: var(--sk-gold); }
+.color-status { margin: 0.45rem 0 0; padding: 0.5rem 0.7rem; border-radius: 10px; background: var(--accent-soft); color: var(--ink); font-size: 0.9rem; font-weight: 600; }
+.color-undo { margin-left: 0.25rem; min-height: 32px; color: var(--ink); }
+/* CSS-drawn generic tank silhouette (no logos) */
+.m-tank { width: 38px; height: 22px; }
+.m-tank::before { content: ""; position: absolute; left: 8px; top: 0; width: 15px; height: 9px; border-radius: 4px 4px 1px 1px; background: var(--accent); }
+.m-tank::before { box-shadow: 14px 3px 0 -2px var(--gold); }
+.m-tank i, .m-tank::after { content: ""; position: absolute; left: 0; bottom: 0; width: 34px; height: 12px; border-radius: 6px; background: repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 3px, transparent 3px 7px) 0 100% / 100% 4px no-repeat, var(--accent); }

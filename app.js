@@ -16,6 +16,9 @@
     return kidName + " wants " + words + " dollars (via evaandgabe.com)";
   }
 
+  var SKINS_KEY = "evaandgabe-skins";
+  var SKIN_LIB = window.EG_SKINS || { EVA_SKINS: [], GABE_SKINS: [], DEFAULTS: { eva: "", gabe: "" } };
+
   var state = {
     kid: "eva",
     year: null,
@@ -27,22 +30,12 @@
     parent: false,
     updates: [],
     tasks: { claims: {}, completions: [] },
-    evaLook: "a",
-    gabeLook: "a"
+    skins: { eva: SKIN_LIB.DEFAULTS.eva, gabe: SKIN_LIB.DEFAULTS.gabe },
+    colorReq: { eva: null }
   };
+  var COLORS_KEY = "evaandgabe-colors";
+  var COLOR_LIB = window.EG_COLOR || null;
   var TASKS_KEY = "evaandgabe-tasks";
-  var EVA_LOOKS = [
-    { id: "a", label: "Roses" },
-    { id: "b", label: "Wildflowers" },
-    { id: "c", label: "Daisies" },
-    { id: "d", label: "Blossoms" }
-  ];
-  var GABE_LOOKS = [
-    { id: "a", label: "Classic" },
-    { id: "b", label: "Two-tone" },
-    { id: "c", label: "Colors" },
-    { id: "d", label: "Glow" }
-  ];
   var CLAIM_MSG = "You have claimed this task. SatBuddy is needed by 10 PM tonight.";
 
   var els = {};
@@ -142,6 +135,12 @@
     els.tabGabe.classList.toggle("is-active", state.kid === "gabe");
     els.tabEva.setAttribute("aria-selected", state.kid === "eva" ? "true" : "false");
     els.tabGabe.setAttribute("aria-selected", state.kid === "gabe" ? "true" : "false");
+    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid"), function (b) {
+      var on = b.getAttribute("data-kid") === state.kid;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current");
+    });
     els.kidPanel.setAttribute("aria-labelledby", state.kid === "eva" ? "tab-eva" : "tab-gabe");
     els.calendarEyebrow.textContent = state.kid === "eva" ? "Eva's calendar" : "Gabe's calendar";
     els.requestHeading.textContent = state.kid === "eva" ? "Eva, need something?" : "Gabe, need something?";
@@ -520,23 +519,196 @@
   }
 
 
-  function applyLooks() {
-    document.body.setAttribute("data-eva-look", state.evaLook || "a");
-    document.body.setAttribute("data-gabe-look", state.gabeLook || "a");
-    renderLookPicker();
+  function skinList(kid) {
+    return kid === "gabe" ? SKIN_LIB.GABE_SKINS : SKIN_LIB.EVA_SKINS;
   }
 
-  function renderLookPicker() {
-    var box = $("look-swatches");
-    var label = $("look-label");
+  function findSkin(kid, id) {
+    var list = skinList(kid);
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    var fallback = SKIN_LIB.DEFAULTS[kid];
+    for (var j = 0; j < list.length; j++) if (list[j].id === fallback) return list[j];
+    return list[0] || null;
+  }
+
+  function loadSkins() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(SKINS_KEY) || "{}");
+      if (saved && typeof saved === "object") {
+        if (saved.eva && findSkin("eva", saved.eva).id === saved.eva) state.skins.eva = saved.eva;
+        if (saved.gabe && findSkin("gabe", saved.gabe).id === saved.gabe) state.skins.gabe = saved.gabe;
+      }
+    } catch (err) {}
+  }
+
+  function saveSkins() {
+    try { localStorage.setItem(SKINS_KEY, JSON.stringify(state.skins)); } catch (err) {}
+  }
+
+  function loadColorReq() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(COLORS_KEY) || "{}");
+      if (saved && saved.eva && COLOR_LIB && COLOR_LIB.theme(saved.eva)) state.colorReq.eva = saved.eva;
+    } catch (err) {}
+  }
+
+  function saveColorReq() {
+    try { localStorage.setItem(COLORS_KEY, JSON.stringify(state.colorReq)); } catch (err) {}
+  }
+
+  // Only palette keys can be overridden by a color request. Fonts, radius, card and header styles stay from the skin.
+  var COLOR_KEYS = ["bg", "surface", "bg2", "ink", "soft", "line", "accent", "accentDark", "accentSoft", "gold", "onAccent", "dark"];
+
+  function effectiveSkin(kid) {
+    var skin = findSkin(kid, state.skins[kid]);
+    var spec = kid === "eva" ? state.colorReq.eva : null;
+    var pal = spec && COLOR_LIB ? COLOR_LIB.theme(spec) : null;
+    if (!skin || !pal) return skin;
+    var out = {};
+    Object.keys(skin).forEach(function (k) { out[k] = skin[k]; });
+    COLOR_KEYS.forEach(function (k) { if (k in pal) out[k] = pal[k]; });
+    out.colorLabel = spec.label;
+    return out;
+  }
+
+  function showColorStatus() {
+    var box = $("color-status");
     if (!box) return;
-    var looks = state.kid === "gabe" ? GABE_LOOKS : EVA_LOOKS;
-    var current = state.kid === "gabe" ? state.gabeLook : state.evaLook;
-    if (label) label.textContent = state.kid === "gabe" ? "Try another look (Gabe)" : "Try another look (Eva)";
-    box.innerHTML = looks.map(function (look) {
-      var on = look.id === current ? " is-current" : "";
-      return '<button type="button" class="look-swatch' + on + '" data-look="' + look.id + '">' + escapeHtml(look.label) + "</button>";
+    var spec = state.colorReq.eva;
+    if (state.kid !== "eva" || !spec) { box.hidden = true; return; }
+    $("color-status-text").textContent = "Colors changed to " + spec.label + ". Only the colors change. Your note still goes to Dad when you send it.";
+    box.hidden = false;
+  }
+
+  var colorTimer = null;
+  function onRequestTyping() {
+    if (state.kid !== "eva" || !COLOR_LIB || !els.requestText) return;
+    clearTimeout(colorTimer);
+    colorTimer = setTimeout(function () {
+      var spec = COLOR_LIB.parse(els.requestText.value);
+      if (!spec || !COLOR_LIB.theme(spec)) return;
+      var cur = state.colorReq.eva;
+      if (cur && cur.color === spec.color && cur.mod === spec.mod) return;
+      state.colorReq.eva = { color: spec.color, mod: spec.mod, label: spec.label };
+      saveColorReq();
+      applyLooks();
+    }, 450);
+  }
+
+  var SKIN_VARS = {
+    bg: "--sk-bg", surface: "--sk-surface", bg2: "--sk-bg2", ink: "--sk-ink", soft: "--sk-soft", line: "--sk-line",
+    accent: "--sk-accent", accentDark: "--sk-accent-dark", accentSoft: "--sk-accent-soft", gold: "--sk-gold",
+    onAccent: "--sk-on-accent", head: "--sk-head", body: "--sk-body", radius: "--sk-radius"
+  };
+
+  function skinStyle(skin) {
+    return Object.keys(SKIN_VARS).map(function (k) { return SKIN_VARS[k] + ":" + skin[k]; }).join(";");
+  }
+
+  function motifMarkup(motif) {
+    var glyphs = {
+      flowers: ["✿", "❀", "✿"], blossoms: ["❀", "✿", "❀"], hearts: ["♥", "♡", "♥"], stars: ["✦", "✧", "✦"],
+      moon: ["☾", "✦", "✧"], sun: ["☀", "✺", "☀"], leaves: ["❦", "❧", "❦"], waves: ["〰", "〰", "〰"],
+      snow: ["❄", "❅", "❆"], sparkle: ["✧", "✦", "✧"], music: ["♪", "♫", "♪"]
+    };
+    if (motif === "ps") return '<span class="m-shape m-triangle"></span><span class="m-shape m-circle"></span><span class="m-shape m-cross"></span><span class="m-shape m-square"></span>';
+    if (motif === "cr") return '<span class="m-shape m-crown"></span><span class="m-shape m-drop"></span><span class="m-shape m-shield"></span>';
+    if (motif === "tank") return '<span class="m-shape m-tank"></span>';
+    if (motif === "ball") return '<span class="m-shape m-ball"></span>';
+    if (motif === "bolt") return '<span class="m-shape m-bolt"></span><span class="m-shape m-bolt"></span>';
+    if (motif === "pixel") return '<span class="m-shape m-pixel"></span>';
+    var g = glyphs[motif];
+    if (!g) return "";
+    return g.map(function (c) { return '<span class="g">' + c + "</span>"; }).join("");
+  }
+
+  function applyLooks() {
+    var skin = effectiveSkin(state.kid);
+    if (!skin) return;
+    var section = document.querySelector(".kids-section");
+    if (section) section.setAttribute("style", skinStyle(skin));
+    var b = document.body;
+    b.setAttribute("data-skin", skin.id);
+    b.setAttribute("data-skin-card", skin.card);
+    b.setAttribute("data-skin-head", skin.headStyle);
+    b.setAttribute("data-skin-motif", skin.motif);
+    b.setAttribute("data-skin-dark", skin.dark ? "true" : "false");
+    b.setAttribute("data-skin-upper", skin.upper ? "true" : "false");
+    b.setAttribute("data-eva-skin", state.skins.eva);
+    b.setAttribute("data-gabe-skin", state.skins.gabe);
+    var motif = $("skin-motif");
+    if (motif) motif.innerHTML = motifMarkup(skin.motif);
+    var btn = $("design-btn");
+    if (btn) btn.setAttribute("aria-label", "Try a different design for " + (state.kid === "gabe" ? "Gabe" : "Eva") + ". Current design: " + skin.name);
+    b.setAttribute("data-color-request", skin.colorLabel || "");
+    showColorStatus();
+    if (els.skinModal && !els.skinModal.hidden) renderSkinGrid();
+  }
+
+  function skinTagLabel(skin) {
+    if (skin.tag === "ps") return "PlayStation-inspired";
+    if (skin.tag === "cr") return "Clash Royale-inspired";
+    if (skin.tag === "wot") return "World of Tanks-inspired";
+    return "";
+  }
+
+  function renderSkinGrid() {
+    var grid = $("skin-grid");
+    if (!grid) return;
+    var list = skinList(state.kid);
+    var current = state.skins[state.kid];
+    var kidName = state.kid === "gabe" ? "Gabe" : "Eva";
+    var title = $("skin-title");
+    if (title) title.textContent = "Pick a design for " + kidName;
+    var count = $("skin-count");
+    if (count) count.textContent = String(list.length);
+    grid.innerHTML = list.map(function (skin) {
+      var on = skin.id === current;
+      var tag = skinTagLabel(skin);
+      return '<li><button type="button" class="skin-option" data-skin-id="' + escapeHtml(skin.id) + '" data-skin-tag="' + escapeHtml(skin.tag) + '" aria-pressed="' + (on ? "true" : "false") + '" title="' + escapeHtml(skin.desc) + '">' +
+        '<span class="skin-thumb" aria-hidden="true" style="' + escapeHtml(skinStyle(skin)) + '" data-card="' + skin.card + '" data-head="' + skin.headStyle + '" data-upper="' + (skin.upper ? "true" : "false") + '">' +
+          '<span class="t-motif">' + motifMarkup(skin.motif) + '</span>' +
+          '<span class="t-bar"></span>' +
+          '<span class="t-card a"><span class="t-head">Aa ' + escapeHtml(skin.name.split(" ")[0]) + '</span><span class="t-line"></span><span class="t-line short"></span><span class="t-btn"></span></span>' +
+          '<span class="t-card b"><span class="t-dot"></span><span class="t-line"></span></span>' +
+        '</span>' +
+        '<span class="skin-name">' + escapeHtml(skin.name) + '</span>' +
+        (tag ? '<span class="skin-tag">' + tag + '</span>' : '') +
+        (on ? '<span class="skin-current-note">In use</span>' : '') +
+      '</button></li>';
     }).join("");
+  }
+
+  var skinReturnFocus = null;
+
+  function openSkinModal() {
+    if (!els.skinModal) return;
+    skinReturnFocus = document.activeElement;
+    renderSkinGrid();
+    els.skinModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    var current = els.skinModal.querySelector('.skin-option[aria-pressed="true"]') || els.skinModal.querySelector(".skin-option");
+    if (current) { current.focus(); current.scrollIntoView({ block: "nearest" }); }
+  }
+
+  function closeSkinModal() {
+    if (!els.skinModal || els.skinModal.hidden) return;
+    els.skinModal.hidden = true;
+    document.body.style.overflow = "";
+    if (skinReturnFocus && typeof skinReturnFocus.focus === "function") skinReturnFocus.focus();
+    else if (els.designBtn) els.designBtn.focus();
+  }
+
+  function chooseSkin(id) {
+    var skin = findSkin(state.kid, id);
+    if (!skin || skin.id !== id) return;
+    state.skins[state.kid] = id;
+    saveSkins();
+    if (state.kid === "eva" && state.colorReq.eva) { state.colorReq.eva = null; saveColorReq(); }
+    applyLooks();
+    renderSkinGrid();
+    var btn = els.skinModal && els.skinModal.querySelector('.skin-option[data-skin-id="' + id + '"]');
+    if (btn) btn.focus();
   }
 
   function loadTasksLocal() {
@@ -820,7 +992,10 @@
     els.pinCancel = $("pin-cancel");
     els.year = $("year");
     els.updateList = $("update-list");
-    els.lookSwatches = $("look-swatches");
+    els.designBtn = $("design-btn");
+    els.skinModal = $("skin-modal");
+    els.skinGrid = $("skin-grid");
+    els.skinClose = $("skin-close");
     els.customizeBtn = $("customize-btn");
     els.change24Btn = $("change24-btn");
     els.suggestModal = $("suggest-modal");
@@ -840,17 +1015,50 @@
   function bind() {
     els.tabEva.addEventListener("click", function () { setKid("eva"); });
     els.tabGabe.addEventListener("click", function () { setKid("gabe"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid"), function (b) {
+      b.addEventListener("click", function () { setKid(b.getAttribute("data-kid")); });
+    });
 
-    if (els.lookSwatches) {
-      els.lookSwatches.addEventListener("click", function (event) {
-        var btn = event.target.closest("[data-look]");
-        if (!btn) return;
-        var look = btn.getAttribute("data-look");
-        if (state.kid === "gabe") state.gabeLook = look;
-        else state.evaLook = look;
-        applyLooks();
+    if (els.designBtn) els.designBtn.addEventListener("click", openSkinModal);
+    if (els.requestText) els.requestText.addEventListener("input", onRequestTyping);
+    var colorUndo = $("color-undo");
+    if (colorUndo) colorUndo.addEventListener("click", function () { state.colorReq.eva = null; saveColorReq(); applyLooks(); });
+    if (els.skinClose) els.skinClose.addEventListener("click", closeSkinModal);
+    if (els.skinModal) {
+      els.skinModal.addEventListener("click", function (event) {
+        if (event.target === els.skinModal) { closeSkinModal(); return; }
+        var opt = event.target.closest("[data-skin-id]");
+        if (opt) chooseSkin(opt.getAttribute("data-skin-id"));
+      });
+      els.skinModal.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") { event.preventDefault(); closeSkinModal(); return; }
+        if (event.key === "Tab") {
+          var focusables = Array.prototype.slice.call(els.skinModal.querySelectorAll("button"));
+          if (!focusables.length) return;
+          var first = focusables[0];
+          var last = focusables[focusables.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+          return;
+        }
+        var arrows = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: "down", ArrowUp: "up" };
+        if (!(event.key in arrows)) return;
+        var opts = Array.prototype.slice.call(els.skinModal.querySelectorAll(".skin-option"));
+        var idx = opts.indexOf(document.activeElement);
+        if (idx < 0) return;
+        var step = arrows[event.key];
+        if (step === "down" || step === "up") {
+          var top0 = opts[idx].getBoundingClientRect().top;
+          var cols = opts.filter(function (o) { return Math.abs(o.getBoundingClientRect().top - top0) < 2; }).length || 1;
+          step = step === "down" ? cols : -cols;
+        }
+        var next = opts[idx + step];
+        if (next) { event.preventDefault(); next.focus(); }
       });
     }
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && els.skinModal && !els.skinModal.hidden) closeSkinModal();
+    });
 
     if (els.updateList) {
       els.updateList.addEventListener("click", function (event) {
@@ -1077,6 +1285,9 @@
     state.year = today.year;
     state.month = today.month - 1;
     bind();
+    loadSkins();
+    loadColorReq();
+    applyLooks();
     state.api = await detectApi();
     await loadEvents();
     await loadWishlist();
