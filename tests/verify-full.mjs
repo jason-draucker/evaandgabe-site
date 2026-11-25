@@ -217,7 +217,7 @@ rec2("Eva and Gabe signoff at bottom of request", alertInfo.signoff === "Eva and
 const ledeGone = await page.evaluate(() => /Calendars,\s*a wish list,\s*and a simple way to ask Dad/i.test(document.body.innerText));
 rec2("tagline calendars/wish list/ask Dad removed", ledeGone === false);
 const entries = await page.$$eval(".family-entry", (els) => els.map((e) => e.textContent.trim()));
-rec2("two smaller Eva then Gabe entries", entries.length === 2 && entries[0] === "Eva" && entries[1] === "Gabe", JSON.stringify(entries));
+rec2("two smaller Eva then Gabe entries", entries.length === 2 && entries[0] === "Eva, click here" && entries[1] === "Gabe, click here", JSON.stringify(entries));
 
 const imgInfo = await page.$eval("#update-list .update-image", (el) => ({
   alt: el.getAttribute("alt"),

@@ -24,8 +24,8 @@ describe("Dad request UI (no live email)", () => {
   it("has two smaller Eva then Gabe entries and no third family entry", () => {
     const matches = html.match(/class="family-entry[^"]*"/g) || [];
     assert.equal(matches.length, 2);
-    assert.match(html, /id="entry-eva"[^>]*>Eva</);
-    assert.match(html, /id="entry-gabe"[^>]*>Gabe</);
+    assert.match(html, /id="entry-eva"[^>]*>Eva, click here</);
+    assert.match(html, /id="entry-gabe"[^>]*>Gabe, click here</);
     assert.equal(/\band Mom\b|\bMom request\b|\/mom/i.test(html), false);
     assert.match(css, /family-entry[^{]*\{[^}]*font-size:\s*0\.85em/);
   });
