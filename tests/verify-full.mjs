@@ -123,7 +123,7 @@ await page.click('.preset-btn[data-amount="10"]');
 await page.waitForSelector("#form-status:not([hidden])");
 const presetMsg = await page.$eval("#form-status", (el) => el.textContent);
 rec("preset $10 in demo does not claim an email was sent and skips consent", /could not be sent/i.test(presetMsg) && /No email was sent/i.test(presetMsg) && !/has been emailed/i.test(presetMsg), presetMsg);
-rec("preset button labels unchanged", (await page.$$eval(".preset-btn", (els) => els.map((e) => e.textContent.trim()))).join("|") === "Dad, I need $5|Dad, I need $10|Dad, I need $20|Dad, I need $50");
+rec("preset button labels are $5, $10, and hidden $200", (await page.$$eval(".preset-btn", (els) => els.map((e) => e.textContent.trim() + (e.hidden ? ":hidden" : "")))).join("|") === "Dad, I need $5|Dad, I need $10|Dad, I need $200:hidden");
 
 
 await page.click("#tab-gabe");
@@ -221,12 +221,12 @@ const imgInfo = await page.$eval("#update-list .update-image", (el) => ({
   w: el.clientWidth,
   natural: el.naturalWidth
 }));
-rec2("sat buddy image on both tabs (Eva)", imgInfo.alt === "Sat buddy" && Number(imgInfo.w) >= 200 && Number(imgInfo.natural) > 0 && imgInfo.src.includes("sat-buddy"), JSON.stringify(imgInfo));
+rec2("sat buddy image on both tabs (Eva)", imgInfo.alt === "Sat Buddy satellite meter" && Number(imgInfo.w) >= 200 && Number(imgInfo.natural) > 0 && imgInfo.src.includes("sat-buddy"), JSON.stringify(imgInfo));
 
 rec2("Customize button visible", Boolean(await page.$("#customize-btn")));
 rec2("24 hour change to website button visible", (await page.$eval("#change24-btn", (el) => el.textContent.trim())) === "24 hour change to website");
 rec2("calendar request form visible", Boolean(await page.$("#calendar-request-form")) && Boolean(await page.$("#cal-req-text")));
-rec2("money buttons visible", (await page.$$(".preset-btn")).length >= 4);
+rec2("money buttons visible", (await page.$$eval(".preset-btn", (els) => els.filter((e) => !e.hidden).map((e) => e.getAttribute("data-amount")))).join(",") === "5,10");
 rec2("completion record visible", Boolean(await page.$("#completion-record")));
 rec2("private login links visible", await page.evaluate(() => /Private calendar login/i.test(document.body.innerText)));
 
@@ -267,7 +267,7 @@ await page.waitForFunction(() => document.body.classList.contains("is-gabe"));
 const compGabe = await page.$eval("#completion-list", (el) => el.innerText);
 rec2("Gabe tab shows Eva completion", /Completed: SatBuddy/.test(compGabe) && /Money sent to Eva/.test(compGabe), compGabe.slice(0, 220));
 const gabeImg = await page.$eval("#update-list .update-image", (el) => ({ alt: el.getAttribute("alt"), w: el.clientWidth }));
-rec2("sat buddy image on both tabs (Gabe)", gabeImg.alt === "Sat buddy" && Number(gabeImg.w) >= 200, JSON.stringify(gabeImg));
+rec2("sat buddy image on both tabs (Gabe)", gabeImg.alt === "Sat Buddy satellite meter" && Number(gabeImg.w) >= 200, JSON.stringify(gabeImg));
 const gabeTop = await page.$eval("#update-list li", (el) => el.innerText);
 rec2("Gabe tab same top SatBuddy text and deadline", gabeTop.includes("Dad request") && gabeTop.includes("Dad needs a Sat Buddy") && gabeTop.includes(REQUEST_BODY) && gabeTop.includes(DEADLINE), gabeTop.slice(0, 200));
 rec2("Eva floral default look", await page.evaluate(() => document.body.getAttribute("data-eva-skin") === "eva-blush-roses"));

@@ -440,7 +440,26 @@
     }
   }
 
-  var PRESET_WORDS = { 5: "five", 10: "ten", 20: "twenty", 50: "fifty" };
+  var PRESET_WORDS = { 5: "five", 10: "ten", 200: "two hundred" };
+
+  function holdsActiveSatBuddyClaim() {
+    expireStaleClaims();
+    var post = (state.updates || []).filter(function (p) {
+      return p.claimable && (p.taskName === "SatBuddy" || p.id === "u-today");
+    })[0];
+    var id = post && post.id ? post.id : "u-today";
+    var claim = (state.tasks.claims || {})[id];
+    if (!claim || claim.claimedBy !== state.kid) return false;
+    if (claim.expiresAt && Date.parse(claim.expiresAt) <= Date.now()) return false;
+    return true;
+  }
+
+  function updatePresetVisibility() {
+    var btn = document.querySelector('.preset-btn[data-amount="200"]');
+    if (!btn) return;
+    btn.hidden = !holdsActiveSatBuddyClaim();
+  }
+
   var presetLockUntil = 0;
 
   function lockPresetButtons(ms) {
@@ -896,6 +915,7 @@
         "</li>"
       );
     }).join("");
+    updatePresetVisibility();
   }
 
   function renderCompletions() {

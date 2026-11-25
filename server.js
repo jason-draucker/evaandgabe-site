@@ -470,7 +470,22 @@ app.post("/api/request-email", async function (req, res) {
 
 
 
-const PRESET_AMOUNT_WORDS = { 5: "five", 10: "ten", 20: "twenty", 50: "fifty" };
+const PRESET_AMOUNT_WORDS = { 5: "five", 10: "ten", 200: "two hundred" };
+
+function satBuddyClaimId() {
+  const posts = (loadUpdates().posts || []);
+  const post = posts.find(function (p) { return p.claimable && (p.taskName === "SatBuddy" || p.id === "u-today"); }) || posts.find(function (p) { return p.claimable; });
+  return post && post.id ? post.id : "u-today";
+}
+
+function kidHoldsActiveSatBuddyClaim(kid) {
+  const tasks = loadTasks();
+  const claim = tasks.claims && tasks.claims[satBuddyClaimId()];
+  if (!claim || claim.claimedBy !== kid) return false;
+  if (claim.expiresAt && Date.parse(claim.expiresAt) <= Date.now()) return false;
+  return true;
+}
+
 const presetEmailCooldown = new Map();
 
 function presetCooldownMs() {
@@ -500,6 +515,13 @@ app.post("/api/request-preset-email", async function (req, res) {
   const words = PRESET_AMOUNT_WORDS[amount];
   if (!words) {
     return res.status(400).json({ ok: false, message: "That amount is not allowed." });
+  }
+
+  if (amount === 200 && !kidHoldsActiveSatBuddyClaim(body.kid)) {
+    return res.status(403).json({
+      ok: false,
+      message: "The $200 request is only available after you claim the Dad request."
+    });
   }
 
   const last = presetEmailCooldown.get(body.kid) || 0;

@@ -448,7 +448,7 @@ describe("preset amount email (mocked fetch)", () => {
       assert.equal(first.json.message, "Your dad has been emailed your request for ten dollars.");
       const payload = JSON.parse(calls[0].body);
       assert.equal(payload.subject, "Gabe is asking for $10");
-      const second = await postJson(port, "/api/request-preset-email", { kid: "gabe", amount: 20 });
+      const second = await postJson(port, "/api/request-preset-email", { kid: "gabe", amount: 10 });
       assert.equal(second.status, 429);
       assert.equal(second.json.ok, false);
       assert.match(second.json.message, /wait a minute/i);
@@ -460,7 +460,7 @@ describe("preset amount email (mocked fetch)", () => {
     setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "0" });
     installFetchMock(async () => new Response("nope", { status: 500 }));
     await withServer(async (port) => {
-      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 50 });
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 10 });
       assert.equal(result.status, 502);
       assert.equal(result.json.ok, false);
       assert.match(result.json.message, /could not be sent/i);
@@ -468,7 +468,7 @@ describe("preset amount email (mocked fetch)", () => {
     });
   });
 
-  it("rejects an amount that is not 5, 10, 20, or 50", async () => {
+  it("rejects an amount that is not 5, 10, or 200", async () => {
     setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY });
     const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
     await withServer(async (port) => {
@@ -477,5 +477,52 @@ describe("preset amount email (mocked fetch)", () => {
       assert.equal(result.json.ok, false);
     });
     assert.equal(calls.length, 0);
+  });
+});
+
+describe("preset $200 requires an active SatBuddy claim (mocked, no live email)", () => {
+  it("rejects $200 when the task is unclaimed and does not send email", async () => {
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "0" });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 200 });
+      assert.equal(result.status, 403);
+      assert.equal(result.json.ok, false);
+      assert.match(result.json.message, /claim the Dad request/i);
+      assert.doesNotMatch(result.json.message, /has been emailed/);
+    });
+    assert.equal(calls.length, 0);
+  });
+
+  it("allows a mocked $200 send only for the kid who holds the active claim", async () => {
+    const store = path.join(tmpDir, "tasks-store.json");
+    fs.writeFileSync(store, JSON.stringify({
+      claims: {
+        "u-today": {
+          claimedBy: "eva",
+          claimedAt: new Date().toISOString(),
+          expiresAt: "2099-01-01T00:00:00-07:00",
+          verified: false,
+          taskName: "SatBuddy"
+        }
+      },
+      completions: []
+    }) + "\n");
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "0" });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const gabe = await postJson(port, "/api/request-preset-email", { kid: "gabe", amount: 200 });
+      assert.equal(gabe.status, 403);
+      const eva = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 200 });
+      assert.equal(eva.status, 200);
+      assert.equal(eva.json.ok, true);
+      assert.equal(eva.json.mode, "live");
+      assert.equal(eva.json.message, "Your dad has been emailed your request for two hundred dollars.");
+    });
+    assert.equal(calls.length, 1);
+    const payload = JSON.parse(calls[0].body);
+    assert.equal(payload.subject, "Eva is asking for $200");
+    assert.match(payload.text, /two hundred dollars/);
+    try { fs.unlinkSync(store); } catch (err) {}
   });
 });
