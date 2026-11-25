@@ -210,3 +210,14 @@ body[data-skin-upper="true"] .kids-section .tab { text-transform: uppercase; let
 .m-tank::before { content: ""; position: absolute; left: 8px; top: 0; width: 15px; height: 9px; border-radius: 4px 4px 1px 1px; background: var(--accent); }
 .m-tank::before { box-shadow: 14px 3px 0 -2px var(--gold); }
 .m-tank i, .m-tank::after { content: ""; position: absolute; left: 0; bottom: 0; width: 34px; height: 12px; border-radius: 6px; background: repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 3px, transparent 3px 7px) 0 100% / 100% 4px no-repeat, var(--accent); }
+
+
+/* On phones, drop the rounded skin "island" so the theme runs edge to edge */
+@media (max-width: 799px) {
+  .kids-section {
+    border-radius: 0;
+    box-shadow: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

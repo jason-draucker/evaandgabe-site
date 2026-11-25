@@ -18,7 +18,7 @@ function rec2(name, ok, detail) { record(extra, name, ok, detail); }
 const EVA_TOKEN = "eva-local-demo";
 const GABE_TOKEN = "gabe-local-demo";
 const INBOUND = "inbound-local-demo";
-const REQUEST_TEXT = "Dad request: Dad needs his Sat Buddy from the house. To complete this task, a $20 or $50 Apple Pay to your phone when task completed is required.";
+const REQUEST_TEXT = "Dad needs a Sat Buddy. Claim below and deliver to receive $200.";
 const CLAIM_MSG = "You have claimed this task. SatBuddy is needed by 10 PM tonight.";
 const DEADLINE = "SatBuddy needed by 10 PM tonight";
 
@@ -142,7 +142,7 @@ const emailMsg = await page.$eval("#form-status", (el) => el.textContent);
 rec("typed request emails Dad in demo mode", /would email Dad/i.test(emailMsg), emailMsg);
 
 const wishText = await page.$eval("#wish-list", (el) => el.innerText);
-rec("wish list shows example items and statuses", /Soccer cleats/i.test(wishText) && /On the way/i.test(wishText) && /Got/i.test(wishText), wishText.slice(0, 200));
+rec("wish list shows example items and statuses", /A pair of pants/i.test(wishText) && /A new car/i.test(wishText) && /A trip to Hawaii/i.test(wishText) && /On the way/i.test(wishText) && /Got/i.test(wishText) && !/spaceship/i.test(wishText) && !/Soccer cleats/i.test(wishText), wishText.slice(0, 280));
 
 const parentButtonsBefore = await page.$$eval(".status-btn", (els) => els.length);
 rec("status toggles hidden until parent unlock", parentButtonsBefore === 0);
@@ -194,7 +194,7 @@ const leftover = await page.evaluate(() => /Updates from Dad/.test(document.body
 rec2("no leftover Updates from Dad label", leftover === false);
 
 const firstUpdate = await page.$eval("#update-list li", (el) => el.innerText);
-const REQUEST_BODY = "Dad needs his Sat Buddy from the house. To complete this task, a $20 or $50 Apple Pay to your phone when task completed is required.";
+const REQUEST_BODY = "Dad needs a Sat Buddy. Claim below and deliver to receive $200.";
 rec2("top update is today's SatBuddy request", firstUpdate.includes("Dad request") && firstUpdate.includes("Dad needs a Sat Buddy") && firstUpdate.includes(REQUEST_BODY) && /November 24|Nov 24|2026-11-24/i.test(firstUpdate), firstUpdate.slice(0, 280));
 rec2("SatBuddy needed by 10 PM tonight", firstUpdate.includes(DEADLINE), firstUpdate.slice(0, 200));
 rec2("Claim button on unclaimed SatBuddy", Boolean(await page.$("[data-claim='u-today']")));

@@ -35,6 +35,8 @@ describe("Dad request UI (no live email)", () => {
     assert.match(html, /id="hero-eva"[^>]*>Eva</);
     assert.match(html, /id="hero-gabe"[^>]*>Gabe</);
     assert.equal(/hero-mom|and Mom|wordmark-mom/i.test(html), false);
+    assert.equal(/A place for our family/i.test(html), false);
+    assert.equal(/class="header-tag"/.test(html), false);
   });
 
   it("renders the alert beacon, heading, subline, photo, and signoff for claimable requests", () => {
@@ -49,6 +51,9 @@ describe("Dad request UI (no live email)", () => {
     assert.match(css, /@keyframes alert-pulse/);
     assert.match(css, /--alert-red:\s*#e10600/);
     assert.equal(fs.existsSync(path.join(ROOT, "images", "sat-buddy.jpg")), true);
+    const updates = fs.readFileSync(path.join(ROOT, "data", "updates.json"), "utf8");
+    assert.match(updates, /Dad needs a Sat Buddy\. Claim below and deliver to receive \$200\./);
+    assert.equal(/Apple Pay/i.test(updates), false);
   });
 
   it("does not add Mom or Diana content in new files", () => {

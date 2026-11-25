@@ -2,7 +2,7 @@
   "items": [
     {
       "id": "w1",
-      "title": "EXAMPLE: Soccer cleats",
+      "title": "EXAMPLE: A pair of pants",
       "for": "eva",
       "status": "wanted",
       "note": "Placeholder wish. Swap for a real item."
@@ -16,7 +16,7 @@
     },
     {
       "id": "w3",
-      "title": "EXAMPLE: Basketball",
+      "title": "EXAMPLE: A new car",
       "for": "gabe",
       "status": "wanted",
       "note": "Placeholder wish. Swap for a real item."
@@ -30,7 +30,7 @@
     },
     {
       "id": "w5",
-      "title": "EXAMPLE: Family board game",
+      "title": "EXAMPLE: A trip to Hawaii",
       "for": "both",
       "status": "wanted",
       "note": "Placeholder shared wish."

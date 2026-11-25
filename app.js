@@ -126,7 +126,7 @@
       .replace(/"/g, "&quot;");
   }
 
-  function setKid(kid) {
+  function setKid(kid, opts) {
     state.kid = kid === "gabe" ? "gabe" : "eva";
     document.body.classList.toggle("is-gabe", state.kid === "gabe");
     document.body.classList.toggle("is-eva", state.kid === "eva");
@@ -149,6 +149,16 @@
     applyLooks();
     renderUpdates();
     renderCompletions();
+    if (opts && opts.scroll) {
+      var target = document.querySelector(".kids-section");
+      if (target) {
+        var header = document.querySelector(".site-header");
+        var offset = header ? header.getBoundingClientRect().height : 0;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - offset - 8;
+        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: Math.max(0, top), behavior: reduce ? "auto" : "smooth" });
+      }
+    }
   }
 
   function monthLabel(year, month0) {
@@ -685,11 +695,54 @@
     return g.map(function (c) { return '<span class="g">' + c + "</span>"; }).join("");
   }
 
+
+  function themeColorFromSkin(skin) {
+    var bg = String(skin.bg || "").trim();
+    if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bg)) return bg;
+    var hexes = bg.match(/#(?:[0-9a-f]{3}|[0-9a-f]{6})\b/ig);
+    if (hexes && hexes.length) return hexes[hexes.length - 1];
+    if (skin.bg2 && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(skin.bg2).trim())) return String(skin.bg2).trim();
+    if (skin.surface && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(skin.surface).trim())) return String(skin.surface).trim();
+    return skin.dark ? "#0b0b12" : "#f7f3ed";
+  }
+
   function applyLooks() {
     var skin = effectiveSkin(state.kid);
     if (!skin) return;
+    var themeSolid = themeColorFromSkin(skin);
+    var aliases = [
+      "--page-bg:" + skin.bg,
+      "--theme-solid:" + themeSolid,
+      "--bg:" + (skin.bg2 || skin.surface || themeSolid),
+      "--bg-deep:" + (skin.bg2 || skin.surface || themeSolid),
+      "--surface:" + skin.surface,
+      "--ink:" + skin.ink,
+      "--ink-soft:" + skin.soft,
+      "--line:" + skin.line,
+      "--accent:" + skin.accent,
+      "--accent-dark:" + skin.accentDark,
+      "--accent-soft:" + skin.accentSoft,
+      "--gold:" + skin.gold,
+      "--gold-soft:" + (skin.accentSoft || skin.gold),
+      "--eva:" + skin.accent,
+      "--gabe:" + skin.accent,
+      "--eva-soft:" + skin.accentSoft,
+      "--gabe-soft:" + skin.accentSoft,
+      "--radius:" + skin.radius,
+      "--font-display:" + skin.head,
+      "--font-body:" + skin.body,
+      "--on-accent:" + skin.onAccent
+    ].join(";");
+    var cssText = skinStyle(skin) + ";" + aliases;
+    var root = document.documentElement;
+    root.setAttribute("style", cssText + ";background:" + skin.bg + ";background-color:" + themeSolid + ";color-scheme:" + (skin.dark ? "dark" : "light"));
+    document.body.style.background = "transparent";
+    document.body.style.color = skin.ink;
+    document.body.style.fontFamily = skin.body;
     var section = document.querySelector(".kids-section");
     if (section) section.setAttribute("style", skinStyle(skin));
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", themeSolid);
     var b = document.body;
     b.setAttribute("data-skin", skin.id);
     b.setAttribute("data-skin-card", skin.card);
@@ -1106,7 +1159,7 @@
     els.tabEva.addEventListener("click", function () { setKid("eva"); });
     els.tabGabe.addEventListener("click", function () { setKid("gabe"); });
     Array.prototype.forEach.call(document.querySelectorAll(".hero-kid, .family-entry"), function (b) {
-      b.addEventListener("click", function () { setKid(b.getAttribute("data-kid")); });
+      b.addEventListener("click", function () { setKid(b.getAttribute("data-kid"), { scroll: true }); });
     });
 
     if (els.designBtn) els.designBtn.addEventListener("click", openSkinModal);
