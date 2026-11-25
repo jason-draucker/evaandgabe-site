@@ -198,9 +198,26 @@ const leftover = await page.evaluate(() => /Updates from Dad/.test(document.body
 rec2("no leftover Updates from Dad label", leftover === false);
 
 const firstUpdate = await page.$eval("#update-list li", (el) => el.innerText);
-rec2("top update is today's SatBuddy request", firstUpdate.includes(REQUEST_TEXT) && /November 24|Nov 24|2026-11-24/i.test(firstUpdate), firstUpdate.slice(0, 280));
+const REQUEST_BODY = "Dad needs his Sat Buddy from the house. To complete this task, a $20 or $50 Apple Pay to your phone when task completed is required.";
+rec2("top update is today's SatBuddy request", firstUpdate.includes("Dad request") && firstUpdate.includes("Dad needs a Sat Buddy") && firstUpdate.includes(REQUEST_BODY) && /November 24|Nov 24|2026-11-24/i.test(firstUpdate), firstUpdate.slice(0, 280));
 rec2("SatBuddy needed by 10 PM tonight", firstUpdate.includes(DEADLINE), firstUpdate.slice(0, 200));
 rec2("Claim button on unclaimed SatBuddy", Boolean(await page.$("[data-claim='u-today']")));
+const alertInfo = await page.$eval("#update-list li.is-dad-request", (el) => ({
+  beacon: Boolean(el.querySelector(".alert-beacon[aria-hidden='true']")),
+  alertText: (el.querySelector(".visually-hidden") || {}).textContent || "",
+  heading: (el.querySelector(".dad-request-heading") || {}).textContent || "",
+  subline: (el.querySelector(".dad-request-subline") || {}).textContent || "",
+  signoff: (el.querySelector(".family-signoff") || {}).textContent || "",
+  bodyHasPrefix: /Dad request:/.test((el.querySelector(".update-text") || {}).textContent || "")
+}));
+rec2("spinning red alert beacon", alertInfo.beacon && alertInfo.alertText.trim() === "Alert", JSON.stringify(alertInfo));
+rec2("big Dad request heading and Sat Buddy subline", alertInfo.heading === "Dad request" && alertInfo.subline === "Dad needs a Sat Buddy", JSON.stringify(alertInfo));
+rec2("body does not repeat Dad request prefix", alertInfo.bodyHasPrefix === false, JSON.stringify(alertInfo));
+rec2("Eva and Gabe signoff at bottom of request", alertInfo.signoff === "Eva and Gabe", alertInfo.signoff);
+const ledeGone = await page.evaluate(() => /Calendars,\s*a wish list,\s*and a simple way to ask Dad/i.test(document.body.innerText));
+rec2("tagline calendars/wish list/ask Dad removed", ledeGone === false);
+const entries = await page.$$eval(".family-entry", (els) => els.map((e) => e.textContent.trim()));
+rec2("two smaller Eva then Gabe entries", entries.length === 2 && entries[0] === "Eva" && entries[1] === "Gabe", JSON.stringify(entries));
 
 const imgInfo = await page.$eval("#update-list .update-image", (el) => ({
   alt: el.getAttribute("alt"),
@@ -208,7 +225,7 @@ const imgInfo = await page.$eval("#update-list .update-image", (el) => ({
   w: el.clientWidth,
   natural: el.naturalWidth
 }));
-rec2("sat buddy image on both tabs (Eva)", imgInfo.alt === "Sat buddy" && Number(imgInfo.w) === 200 && imgInfo.src.includes("sat-buddy"), JSON.stringify(imgInfo));
+rec2("sat buddy image on both tabs (Eva)", imgInfo.alt === "Sat buddy" && Number(imgInfo.w) >= 200 && Number(imgInfo.natural) > 0 && imgInfo.src.includes("sat-buddy"), JSON.stringify(imgInfo));
 
 rec2("Customize button visible", Boolean(await page.$("#customize-btn")));
 rec2("24 hour change to website button visible", (await page.$eval("#change24-btn", (el) => el.textContent.trim())) === "24 hour change to website");
@@ -254,9 +271,9 @@ await page.waitForFunction(() => document.body.classList.contains("is-gabe"));
 const compGabe = await page.$eval("#completion-list", (el) => el.innerText);
 rec2("Gabe tab shows Eva completion", /Completed: SatBuddy/.test(compGabe) && /Money sent to Eva/.test(compGabe), compGabe.slice(0, 220));
 const gabeImg = await page.$eval("#update-list .update-image", (el) => ({ alt: el.getAttribute("alt"), w: el.clientWidth }));
-rec2("sat buddy image on both tabs (Gabe)", gabeImg.alt === "Sat buddy" && Number(gabeImg.w) === 200, JSON.stringify(gabeImg));
+rec2("sat buddy image on both tabs (Gabe)", gabeImg.alt === "Sat buddy" && Number(gabeImg.w) >= 200, JSON.stringify(gabeImg));
 const gabeTop = await page.$eval("#update-list li", (el) => el.innerText);
-rec2("Gabe tab same top SatBuddy text and deadline", gabeTop.includes(REQUEST_TEXT) && gabeTop.includes(DEADLINE), gabeTop.slice(0, 200));
+rec2("Gabe tab same top SatBuddy text and deadline", gabeTop.includes("Dad request") && gabeTop.includes("Dad needs a Sat Buddy") && gabeTop.includes(REQUEST_BODY) && gabeTop.includes(DEADLINE), gabeTop.slice(0, 200));
 rec2("Eva floral default look", await page.evaluate(() => document.body.getAttribute("data-eva-skin") === "eva-blush-roses"));
 rec2("Gabe default look applied", await page.evaluate(() => document.body.classList.contains("is-gabe") && document.body.getAttribute("data-skin") === "gabe-classic-blue-black"));
 

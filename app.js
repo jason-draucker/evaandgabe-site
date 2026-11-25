@@ -135,7 +135,7 @@
     els.tabGabe.classList.toggle("is-active", state.kid === "gabe");
     els.tabEva.setAttribute("aria-selected", state.kid === "eva" ? "true" : "false");
     els.tabGabe.setAttribute("aria-selected", state.kid === "gabe" ? "true" : "false");
-    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid, .family-entry"), function (b) {
       var on = b.getAttribute("data-kid") === state.kid;
       b.classList.toggle("is-active", on);
       b.setAttribute("aria-pressed", on ? "true" : "false");
@@ -791,14 +791,18 @@
       return;
     }
     list.innerHTML = posts.map(function (post) {
+      var isRequest = Boolean(post.claimable || post.taskName);
       var img = "";
       if (post.image) {
         var alt = escapeHtml(post.alt || "Update image");
-        img = '<img class="update-image" src="' + escapeHtml(post.image) + '" alt="' + alt + '">';
+        var imgClass = isRequest ? "update-image dad-request-photo" : "update-image";
+        img = '<img class="' + imgClass + '" src="' + escapeHtml(post.image) + '" alt="' + alt + '">';
       }
+      var rawText = post.text || "";
+      var bodyText = isRequest ? rawText.replace(/^\s*Dad request:\s*/i, "") : rawText;
       var body;
-      if (isExample(post.text || "")) body = titleWithTag(post.text);
-      else body = escapeHtml(post.text || "");
+      if (isExample(bodyText)) body = titleWithTag(bodyText);
+      else body = escapeHtml(bodyText);
       var claimHtml = "";
       if (post.claimable) {
         var claim = (state.tasks.claims || {})[post.id];
@@ -815,6 +819,28 @@
         } else {
           claimHtml = deadline + '<div class="claim-row"><button type="button" class="btn" data-claim="' + escapeHtml(post.id) + '">Claim</button></div>';
         }
+      }
+      if (isRequest) {
+        var subline = /sat\s*buddy/i.test(String(post.taskName || "") + " " + rawText) ? "Dad needs a Sat Buddy" : "";
+        var subHtml = subline ? '<p class="dad-request-subline">' + escapeHtml(subline) + "</p>" : "";
+        var banner =
+          '<div class="dad-request-banner">' +
+          '<span class="alert-beacon" aria-hidden="true"><span class="alert-beacon-orbit"></span><span class="alert-beacon-dot"></span></span>' +
+          '<span class="visually-hidden">Alert</span>' +
+          '<div class="dad-request-headings">' +
+          '<h3 class="dad-request-heading">Dad request</h3>' +
+          subHtml +
+          "</div></div>";
+        return (
+          "<li class='is-dad-request" + (post.image ? " has-image" : "") + "'>" +
+          banner +
+          img +
+          '<span class="update-date">' + escapeHtml(formatNiceDate(post.date)) + "</span>" +
+          '<p class="update-text">' + body + "</p>" +
+          claimHtml +
+          '<p class="family-signoff">Eva and Gabe</p>' +
+          "</li>"
+        );
       }
       var cls = post.image ? " has-image" : "";
       return (
@@ -1015,7 +1041,7 @@
   function bind() {
     els.tabEva.addEventListener("click", function () { setKid("eva"); });
     els.tabGabe.addEventListener("click", function () { setKid("gabe"); });
-    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".hero-kid, .family-entry"), function (b) {
       b.addEventListener("click", function () { setKid(b.getAttribute("data-kid")); });
     });
 

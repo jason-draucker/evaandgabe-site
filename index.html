@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Eva &amp; Gabe</title>
-  <meta name="description" content="A simple family page for Eva and Gabe — calendars, a wish list, and a way to ask Dad.">
+  <meta name="description" content="A simple family page for Eva and Gabe.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,10 @@
       <div class="wrap">
         <p class="eyebrow">Hello</p>
         <h1 class="hero-title"><button type="button" class="hero-kid is-active" id="hero-eva" data-kid="eva" aria-pressed="true" aria-controls="kid-panel">Eva</button><span class="hero-slash" aria-hidden="true"> / </span><button type="button" class="hero-kid" id="hero-gabe" data-kid="gabe" aria-pressed="false" aria-controls="kid-panel">Gabe</button></h1>
-        <p class="lede">Calendars, a wish list, and a simple way to ask Dad.</p>
+        <nav class="family-entries" aria-label="Choose a kid">
+          <button type="button" class="family-entry is-active" id="entry-eva" data-kid="eva">Eva</button>
+          <button type="button" class="family-entry" id="entry-gabe" data-kid="gabe">Gabe</button>
+        </nav>
       </div>
     </section>
 

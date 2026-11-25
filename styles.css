@@ -921,3 +921,191 @@ body.is-gabe .event-date {
 .hero-kid.is-active { opacity: 1; text-decoration-color: var(--accent); }
 .hero-kid:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; border-radius: 8px; }
 .hero-slash { color: var(--ink-soft); font-weight: 500; }
+
+
+/* Dad request alert, typography, photo, and smaller Eva/Gabe entries */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.family-entries {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  margin: 0.75rem auto 0;
+  padding: 0;
+}
+
+.family-entry {
+  appearance: none;
+  font: inherit;
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.2;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 2.75rem;
+  padding: 0.55rem 1.1rem;
+  opacity: 0.6;
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.14em;
+  text-decoration-color: transparent;
+  transition: opacity 0.2s, text-decoration-color 0.2s;
+}
+
+.family-entry:hover {
+  opacity: 0.85;
+  text-decoration-color: currentColor;
+}
+
+.family-entry.is-active {
+  opacity: 1;
+  text-decoration-color: var(--accent);
+}
+
+.family-entry:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.dad-request-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 0 0 0.35rem;
+}
+
+.alert-beacon {
+  position: relative;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.35rem;
+  /* Stay red in every skin */
+  --alert-red: #e10600;
+  color: #e10600;
+}
+
+.alert-beacon-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: #ff1f1f;
+  box-shadow:
+    0 0 6px 2px rgba(255, 20, 20, 0.95),
+    0 0 14px 5px rgba(225, 6, 0, 0.55);
+  z-index: 1;
+}
+
+.alert-beacon-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 30, 30, 0.18);
+  border-top-color: #ff1a1a;
+  border-right-color: rgba(255, 40, 40, 0.45);
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+  animation: alert-spin 1s linear infinite;
+}
+
+@keyframes alert-spin {
+  to { transform: rotate(360deg); }
+}
+
+.dad-request-headings {
+  min-width: 0;
+  flex: 1;
+}
+
+.dad-request-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.dad-request-subline {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3.2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.update-list li.is-dad-request .dad-request-photo,
+.update-list li.is-dad-request .update-image {
+  display: block;
+  width: min(100%, 22rem);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin: 0.15rem 0 0.2rem;
+  border-radius: 14px;
+}
+
+.family-signoff {
+  margin: 0.85rem 0 0;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 800px) {
+  .update-list li.is-dad-request,
+  .update-list li.is-dad-request.has-image {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+    grid-template-columns: none;
+  }
+
+  .update-list li.is-dad-request.has-image .update-image,
+  .update-list li.is-dad-request.has-image .dad-request-photo,
+  .update-list li.is-dad-request.has-image .dad-request-banner,
+  .update-list li.is-dad-request.has-image .update-date,
+  .update-list li.is-dad-request.has-image .update-text,
+  .update-list li.is-dad-request.has-image .deadline,
+  .update-list li.is-dad-request.has-image .update-claim-msg,
+  .update-list li.is-dad-request.has-image .claim-meta,
+  .update-list li.is-dad-request.has-image .countdown,
+  .update-list li.is-dad-request.has-image .claim-row,
+  .update-list li.is-dad-request.has-image .family-signoff {
+    grid-column: auto;
+    grid-row: auto;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert-beacon-orbit {
+    animation: alert-pulse 1.6s ease-in-out infinite;
+    border-top-color: #ff1a1a;
+  }
+}
+
+@keyframes alert-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
