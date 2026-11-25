@@ -7,7 +7,7 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(ROOT, "data");
 const SEED_WISHLIST = path.join(DATA_DIR, "wishlist.json");
 const STORE_WISHLIST = path.join(DATA_DIR, "wishlist-store.json");
 const SEED_UPDATES = path.join(DATA_DIR, "updates.json");
@@ -39,9 +39,33 @@ function isSet(name) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function demoOnly() {
-  const flag = (process.env.DEMO_ONLY || "").trim();
+function flagOn(name) {
+  const flag = (process.env[name] || "").trim();
   return flag === "1" || flag.toLowerCase() === "true";
+}
+
+function demoOnly() {
+  return flagOn("DEMO_ONLY");
+}
+
+function emailLiveFlag() {
+  return flagOn("EMAIL_LIVE");
+}
+
+function fromAddress() {
+  return isSet("SMTP_FROM") ? process.env.SMTP_FROM.trim() : "Eva and Gabe <noreply@evaandgabe.com>";
+}
+
+function parseFrom(from) {
+  const match = String(from || "").match(/^(.*)<([^>]+)>\s*$/);
+  if (match) {
+    return { name: match[1].trim().replace(/^"|"$/g, ""), email: match[2].trim() };
+  }
+  return { email: String(from || "").trim() };
+}
+
+function emailProviderReady() {
+  return isSet("RESEND_API_KEY") || isSet("SENDGRID_API_KEY") || (isSet("SMTP_HOST") && isSet("SMTP_FROM"));
 }
 
 function textConfigured() {
@@ -54,10 +78,72 @@ function textConfigured() {
   );
 }
 
+// Live email is on when a provider and JASON_EMAIL are set, and either
+// DEMO_ONLY is off, or EMAIL_LIVE=1 with RESEND_API_KEY (overrides demo for email only).
 function emailConfigured() {
-  if (demoOnly() || !isSet("JASON_EMAIL")) return false;
-  if (isSet("RESEND_API_KEY") || isSet("SENDGRID_API_KEY")) return true;
-  return isSet("SMTP_HOST") && isSet("SMTP_FROM");
+  if (!isSet("JASON_EMAIL") || !emailProviderReady()) return false;
+  if (!demoOnly()) return true;
+  return emailLiveFlag() && isSet("RESEND_API_KEY");
+}
+
+async function sendEmail(options) {
+  const to = options.to;
+  const subject = options.subject;
+  const text = options.text;
+  const toList = Array.isArray(to) ? to : [to];
+  const from = fromAddress();
+
+  if (isSet("RESEND_API_KEY")) {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + process.env.RESEND_API_KEY.trim(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ from: from, to: toList, subject: subject, text: text })
+    });
+    if (!response.ok) {
+      throw new Error("resend-failed");
+    }
+    return;
+  }
+
+  if (isSet("SENDGRID_API_KEY")) {
+    const parsed = parseFrom(from);
+    const fromObj = parsed.name ? { email: parsed.email, name: parsed.name } : { email: parsed.email };
+    const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + process.env.SENDGRID_API_KEY.trim(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: toList.map(function (email) { return { email: email }; }) }],
+        from: fromObj,
+        subject: subject,
+        content: [{ type: "text/plain", value: text }]
+      })
+    });
+    if (!response.ok) {
+      throw new Error("sendgrid-failed");
+    }
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST.trim(),
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: String(process.env.SMTP_PORT) === "465",
+    auth: isSet("SMTP_USER")
+      ? { user: process.env.SMTP_USER.trim(), pass: (process.env.SMTP_PASS || "").trim() }
+      : undefined
+  });
+  await transporter.sendMail({
+    from: from,
+    to: toList.join(", "),
+    subject: subject,
+    text: text
+  });
 }
 
 function adminPin() {
@@ -123,6 +209,10 @@ function envOrDefault(name, fallback) {
 
 function piperEmail() {
   return envOrDefault("PIPER_EMAIL", "piper@evaandgabe.com");
+}
+
+function suggestionsInbox() {
+  return envOrDefault("SUGGESTIONS_INBOX", piperEmail());
 }
 
 function calendarInbox() {
@@ -365,56 +455,11 @@ app.post("/api/request-email", async function (req, res) {
   }
 
   try {
-    const to = process.env.JASON_EMAIL.trim();
-    if (isSet("RESEND_API_KEY")) {
-      const from = isSet("SMTP_FROM") ? process.env.SMTP_FROM.trim() : "Eva and Gabe <noreply@evaandgabe.com>";
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + process.env.RESEND_API_KEY.trim(),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ from: from, to: [to], subject: subject, text: text })
-      });
-      if (!response.ok) {
-        console.log("request-email: Resend returned an error status. No details logged.");
-        return res.status(502).json({ ok: false, message: "The email could not be sent right now." });
-      }
-    } else if (isSet("SENDGRID_API_KEY")) {
-      const from = isSet("SMTP_FROM") ? process.env.SMTP_FROM.trim() : "noreply@evaandgabe.com";
-      const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + process.env.SENDGRID_API_KEY.trim(),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: to }] }],
-          from: { email: from },
-          subject: subject,
-          content: [{ type: "text/plain", value: text }]
-        })
-      });
-      if (!response.ok) {
-        console.log("request-email: SendGrid returned an error status. No details logged.");
-        return res.status(502).json({ ok: false, message: "The email could not be sent right now." });
-      }
-    } else {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST.trim(),
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: String(process.env.SMTP_PORT) === "465",
-        auth: isSet("SMTP_USER")
-          ? { user: process.env.SMTP_USER.trim(), pass: (process.env.SMTP_PASS || "").trim() }
-          : undefined
-      });
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM.trim(),
-        to: to,
-        subject: subject,
-        text: text
-      });
-    }
+    await sendEmail({
+      to: process.env.JASON_EMAIL.trim(),
+      subject: subject,
+      text: text
+    });
     console.log("request-email: live send reported success.");
     return res.json({ ok: true, mode: "live", message: "Email sent to Dad." });
   } catch (err) {
@@ -446,7 +491,7 @@ app.post("/api/tasks", function (req, res) {
   res.json({ ok: true, ...next });
 });
 
-app.post("/api/suggestion", function (req, res) {
+app.post("/api/suggestion", async function (req, res) {
   const body = req.body || {};
   const kid = validKid(body.kid) ? body.kid : null;
   const kind = body.kind === "change24h" ? "change24h" : "customize";
@@ -454,40 +499,52 @@ app.post("/api/suggestion", function (req, res) {
   if (!kid || !message) {
     return res.status(400).json({ ok: false, message: "Please add your idea first." });
   }
+  const to = suggestionsInbox();
   const entry = {
     id: "s-" + Date.now(),
     kid: kid,
     from: kidName(kid),
     kind: kind,
     message: message.slice(0, 2000),
-    to: piperEmail(),
+    to: to,
     at: new Date().toISOString()
   };
   appendStore(STORE_SUGGESTIONS, entry, "items");
   if (!emailConfigured()) {
-    console.log("suggestion: demo mode. Would email piper@evaandgabe.com. No email sent.");
+    console.log("suggestion: demo mode. Would email the suggestions inbox. No email sent.");
     return res.json({
       ok: true,
       mode: "demo",
-      to: piperEmail(),
-      message: "Demo: would email " + piperEmail() + " from " + kidName(kid) + ". No email was sent."
+      to: to,
+      message: "Demo: would email " + to + " from " + kidName(kid) + ". No email was sent."
     });
   }
-  // Live send is only used when DEMO_ONLY is off and email is configured.
-  return res.json({
-    ok: true,
-    mode: "queued",
-    to: piperEmail(),
-    message: "Sent to " + piperEmail() + "."
-  });
+  const kindLabel = kind === "change24h" ? "24-hour website change" : "website customize idea";
+  try {
+    await sendEmail({
+      to: to,
+      subject: kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1) + " from " + kidName(kid) + " on evaandgabe.com",
+      text: "From " + kidName(kid) + ":\nKind: " + kind + "\n\n" + entry.message + "\n"
+    });
+    console.log("suggestion: live send reported success.");
+    return res.json({
+      ok: true,
+      mode: "live",
+      to: to,
+      message: "Sent to " + to + "."
+    });
+  } catch (err) {
+    console.log("suggestion: send failed. No details logged.");
+    return res.status(502).json({ ok: false, message: "The email could not be sent right now." });
+  }
 });
 
-app.post("/api/calendar-request", function (req, res) {
+app.post("/api/calendar-request", async function (req, res) {
   const body = req.body || {};
   const kid = validKid(body.kid) ? body.kid : null;
   const date = String(body.date || "").trim();
-  const text = String(body.text || "").trim().slice(0, 400);
-  if (!kid || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !text) {
+  const note = String(body.text || "").trim().slice(0, 400);
+  if (!kid || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !note) {
     return res.status(400).json({ ok: false, message: "Please add a date and a short note." });
   }
   const request = {
@@ -495,7 +552,7 @@ app.post("/api/calendar-request", function (req, res) {
     kid: kid,
     from: kidName(kid),
     date: date,
-    text: text,
+    text: note,
     to: calendarInbox(),
     at: new Date().toISOString()
   };
@@ -506,12 +563,38 @@ app.post("/api/calendar-request", function (req, res) {
     kid: kid,
     date: date,
     time: "",
-    title: text,
+    title: note,
     note: "Added from the calendar form (demo apply)."
   };
   bundle.events = bundle.events.concat([event]);
   saveEvents(bundle);
-  res.json({ ok: true, event: event, message: "It's on the calendar now." });
+
+  if (!emailConfigured()) {
+    console.log("calendar-request: demo mode. Entry applied; no email sent.");
+    return res.json({ ok: true, mode: "demo", event: event, message: "It's on the calendar now." });
+  }
+
+  try {
+    await sendEmail({
+      to: calendarInbox(),
+      subject: "Calendar request from " + kidName(kid) + " on evaandgabe.com",
+      text: "From " + kidName(kid) + ":\nDate: " + date + "\n\n" + note + "\n"
+    });
+    console.log("calendar-request: live send reported success.");
+    return res.json({
+      ok: true,
+      mode: "live",
+      event: event,
+      message: "It's on the calendar now, and an email was sent."
+    });
+  } catch (err) {
+    console.log("calendar-request: send failed. No details logged.");
+    return res.status(502).json({
+      ok: false,
+      event: event,
+      message: "The calendar entry was saved, but the email could not be sent right now."
+    });
+  }
 });
 
 app.post("/api/inbound-email", function (req, res) {
@@ -622,10 +705,30 @@ app.use(express.static(ROOT, {
   extensions: ["html"]
 }));
 
-app.listen(PORT, function () {
-  const text = textConfigured();
-  const email = emailConfigured();
-  console.log("evaandgabe site listening on port " + PORT);
-  console.log("Text endpoint: " + (text ? "live" : "demo mode"));
-  console.log("Email endpoint: " + (email ? "live" : "demo mode"));
-});
+function start(port) {
+  const listenPort = port == null ? PORT : port;
+  return app.listen(listenPort, function () {
+    const text = textConfigured();
+    const email = emailConfigured();
+    console.log("evaandgabe site listening on port " + listenPort);
+    console.log("Text endpoint: " + (text ? "live" : "demo mode"));
+    console.log("Email endpoint: " + (email ? "live" : "demo mode"));
+  });
+}
+
+if (require.main === module) {
+  start();
+}
+
+module.exports = {
+  app,
+  start,
+  demoOnly,
+  emailLiveFlag,
+  textConfigured,
+  emailConfigured,
+  fromAddress,
+  calendarInbox,
+  suggestionsInbox,
+  sendEmail
+};

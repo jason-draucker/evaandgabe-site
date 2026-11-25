@@ -37,7 +37,14 @@ Prototype parent PIN: `2468`. Change this before any real use (see `ADMIN_PIN` b
 
 ## What needs keys for live sending
 
-The backend only sends a real message when the matching keys are set **and** `DEMO_ONLY` is not `1`.
+The backend only sends a real **text** when the Twilio keys are set **and** `DEMO_ONLY` is not `1`. Texts stay simulated whenever `DEMO_ONLY` is on, even if `EMAIL_LIVE` is on.
+
+Email can go live in two ways:
+
+- `DEMO_ONLY` is not `1`, and `JASON_EMAIL` plus a provider (`RESEND_API_KEY`, `SENDGRID_API_KEY`, or SMTP) are set; or
+- `EMAIL_LIVE=1` and `RESEND_API_KEY` and `JASON_EMAIL` are set, even if `DEMO_ONLY=1`.
+
+Live email covers the Ask Dad note (`/api/request-email`, sent to `JASON_EMAIL`), calendar submissions (`/api/calendar-request`, sent to `CALENDAR_INBOX`, and still added to the calendar), and Customize / 24-hour change ideas (`/api/suggestion`, sent to `SUGGESTIONS_INBOX` or `PIPER_EMAIL`). The From address is `SMTP_FROM`, or `Eva and Gabe <noreply@evaandgabe.com>` if that is unset. If a live send fails, the API returns an error and does not claim success.
 
 ### Texts (preset money buttons) — Twilio
 
@@ -59,7 +66,11 @@ Set `JASON_EMAIL`, then one of:
 ### Other optional keys
 
 - `ADMIN_PIN` — parent-tools PIN (defaults to the prototype PIN above if unset)
-- `DEMO_ONLY=1` — force demo mode even if other keys are present (no real sends)
+- `DEMO_ONLY=1` — keep texts (and email, unless `EMAIL_LIVE` is also on) in demo mode even if other keys are present
+- `EMAIL_LIVE=1` — allow real email when `RESEND_API_KEY` and `JASON_EMAIL` are set, even if `DEMO_ONLY=1`. Does not enable texts.
+- `CALENDAR_INBOX` — where calendar form submissions are emailed (default: `calendar@evaandgabe.com`)
+- `PIPER_EMAIL` / `SUGGESTIONS_INBOX` — where Customize and 24-hour change ideas are emailed (default: `piper@evaandgabe.com`)
+- `SMTP_FROM` — From address for outgoing mail (default: `Eva and Gabe <noreply@evaandgabe.com>`)
 - `PORT` — server port (defaults to 3000)
 
 Never put secret values in this README, in screenshots, or in client-side code. The website does not display a phone number or any pricing.
@@ -73,6 +84,12 @@ npm start
 ```
 
 Then open http://127.0.0.1:3000/
+
+To run the API tests (they mock outbound email and never send a real message):
+
+```bash
+npm test
+```
 
 To try only the static demo, skip the server and open `index.html`, or run:
 
