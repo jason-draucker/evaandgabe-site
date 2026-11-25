@@ -108,7 +108,7 @@ const eyebrow = await page.$eval("#calendar-eyebrow", (el) => el.textContent);
 rec("Eva calendar label", /Eva/i.test(eyebrow), eyebrow);
 
 const upcoming = await page.$eval("#upcoming-list", (el) => el.innerText);
-rec("Eva upcoming has example events", /Example/i.test(upcoming) && /concert|library|art|break/i.test(upcoming), upcoming.slice(0, 180));
+rec("Eva upcoming has birthday, Christmas, and New Year", /Eva's birthday/.test(upcoming) && /Christmas Day/.test(upcoming) && /New Year's Day/.test(upcoming) && !/Example/i.test(upcoming), upcoming.slice(0, 280));
 
 const phoneOnPage = await page.evaluate(() => {
   const text = document.body.innerText;
@@ -121,21 +121,17 @@ rec("TCPA checkbox starts unchecked", tcpaChecked === false);
 
 await page.click('.preset-btn[data-amount="10"]');
 await page.waitForSelector("#form-status:not([hidden])");
-const noConsentMsg = await page.$eval("#form-status", (el) => el.textContent);
-rec("preset blocked without consent", /consent/i.test(noConsentMsg), noConsentMsg);
+const presetMsg = await page.$eval("#form-status", (el) => el.textContent);
+rec("preset $10 in demo does not claim an email was sent and skips consent", /could not be sent/i.test(presetMsg) && /No email was sent/i.test(presetMsg) && !/has been emailed/i.test(presetMsg), presetMsg);
+rec("preset button labels unchanged", (await page.$$eval(".preset-btn", (els) => els.map((e) => e.textContent.trim()))).join("|") === "Dad, I need $5|Dad, I need $10|Dad, I need $20|Dad, I need $50");
 
-await page.click("#tcpa");
-await page.click('.preset-btn[data-amount="10"]');
-await page.waitForFunction(() => /would text Dad/i.test(document.querySelector("#form-status")?.textContent || ""));
-const textMsg = await page.$eval("#form-status", (el) => el.textContent);
-rec("preset texts Dad in demo mode", /would text Dad/i.test(textMsg) && /Eva wants ten dollars \(via evaandgabe\.com\)/.test(textMsg), textMsg);
 
 await page.click("#tab-gabe");
 await page.waitForFunction(() => document.querySelector("#tab-gabe").getAttribute("aria-selected") === "true");
 const gabeEyebrow = await page.$eval("#calendar-eyebrow", (el) => el.textContent);
 const gabeUpcoming = await page.$eval("#upcoming-list", (el) => el.innerText);
 rec("Gabe tab switches calendar", /Gabe/i.test(gabeEyebrow), gabeEyebrow);
-rec("Gabe upcoming has example events", /Example/i.test(gabeUpcoming) && /Basketball|Science|break/i.test(gabeUpcoming), gabeUpcoming.slice(0, 180));
+rec("Gabe upcoming has the same three dates", /Eva's birthday/.test(gabeUpcoming) && /Christmas Day/.test(gabeUpcoming) && /New Year's Day/.test(gabeUpcoming) && !/Example/i.test(gabeUpcoming), gabeUpcoming.slice(0, 280));
 
 await page.$eval("#request-text", (el) => {
   el.value = "Hi Dad, can I have a ride after the game?";
@@ -282,7 +278,8 @@ const health = await (await fetch("http://127.0.0.1:3000/api/health")).json();
 rec2("health is demo mode", health.ok === true && health.mode === "demo" && health.textConfigured === false && health.emailConfigured === false, health.mode);
 
 const ev = await (await fetch("http://127.0.0.1:3000/api/events")).json();
-rec2("GET /api/events", Array.isArray(ev.events) && ev.events.length > 0, String((ev.events || []).length));
+const evTitles = (ev.events || []).map((e) => e.date + " " + e.title).sort();
+rec2("GET /api/events has only the three seeded dates", ev.timezone === "America/Denver" && ev.events.length === 3 && evTitles.join("|") === "2026-11-28 Eva's birthday|2026-12-25 Christmas Day|2027-01-01 New Year's Day", JSON.stringify({ timezone: ev.timezone, evTitles }));
 
 const noToken = await fetch("http://127.0.0.1:3000/api/kid/eva/session");
 rec2("kid session rejected without token", noToken.status === 401);

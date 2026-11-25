@@ -23,7 +23,8 @@ const ENV_KEYS = [
   "JASON_CELL",
   "PIPER_EMAIL",
   "SUGGESTIONS_INBOX",
-  "CALENDAR_INBOX"
+  "CALENDAR_INBOX",
+  "PRESET_EMAIL_COOLDOWN_MS"
 ];
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "evaandgabe-email-"));
@@ -399,6 +400,81 @@ describe("API email vs text behavior", () => {
       assert.equal(result.status, 200);
       assert.equal(result.json.mode, "demo");
       assert.match(result.json.message, /No email was sent/);
+    });
+    assert.equal(calls.length, 0);
+  });
+});
+
+describe("preset amount email (mocked fetch)", () => {
+  it("does not send or claim success in demo mode, and does not require consent", async () => {
+    setEnv({ DEMO_ONLY: "1" });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 5 });
+      assert.equal(result.status, 200);
+      assert.equal(result.json.ok, true);
+      assert.equal(result.json.mode, "demo");
+      assert.match(result.json.message, /No email was sent/);
+      assert.doesNotMatch(result.json.message, /has been emailed/);
+    });
+    assert.equal(calls.length, 0);
+  });
+
+  it("sends a live $5 email with kid and time in the subject and body", async () => {
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "0" });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 5 });
+      assert.equal(result.status, 200);
+      assert.equal(result.json.ok, true);
+      assert.equal(result.json.mode, "live");
+      assert.equal(result.json.message, "Your dad has been emailed your request for five dollars.");
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "https://api.resend.com/emails");
+    const payload = JSON.parse(calls[0].body);
+    assert.deepEqual(payload.to, ["dad@example.com"]);
+    assert.equal(payload.subject, "Eva is asking for $5");
+    assert.match(payload.text, /Eva is asking for \$5 \(five dollars\)/);
+    assert.match(payload.text, /Sent at /);
+  });
+
+  it("sends a live $10 email with the ten-dollars confirmation and rate-limits a repeat", async () => {
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "60000" });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const first = await postJson(port, "/api/request-preset-email", { kid: "gabe", amount: 10 });
+      assert.equal(first.status, 200);
+      assert.equal(first.json.message, "Your dad has been emailed your request for ten dollars.");
+      const payload = JSON.parse(calls[0].body);
+      assert.equal(payload.subject, "Gabe is asking for $10");
+      const second = await postJson(port, "/api/request-preset-email", { kid: "gabe", amount: 20 });
+      assert.equal(second.status, 429);
+      assert.equal(second.json.ok, false);
+      assert.match(second.json.message, /wait a minute/i);
+    });
+    assert.equal(calls.length, 1);
+  });
+
+  it("returns an honest error when Resend fails and does not claim the email was sent", async () => {
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY, PRESET_EMAIL_COOLDOWN_MS: "0" });
+    installFetchMock(async () => new Response("nope", { status: 500 }));
+    await withServer(async (port) => {
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 50 });
+      assert.equal(result.status, 502);
+      assert.equal(result.json.ok, false);
+      assert.match(result.json.message, /could not be sent/i);
+      assert.doesNotMatch(result.json.message, /has been emailed/);
+    });
+  });
+
+  it("rejects an amount that is not 5, 10, 20, or 50", async () => {
+    setEnv({ DEMO_ONLY: "1", EMAIL_LIVE: "1", ...RESEND_READY });
+    const calls = installFetchMock(async () => new Response("{}", { status: 200 }));
+    await withServer(async (port) => {
+      const result = await postJson(port, "/api/request-preset-email", { kid: "eva", amount: 15 });
+      assert.equal(result.status, 400);
+      assert.equal(result.json.ok, false);
     });
     assert.equal(calls.length, 0);
   });

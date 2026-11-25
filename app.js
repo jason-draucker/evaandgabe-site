@@ -440,6 +440,50 @@
     }
   }
 
+  var PRESET_WORDS = { 5: "five", 10: "ten", 20: "twenty", 50: "fifty" };
+  var presetLockUntil = 0;
+
+  function lockPresetButtons(ms) {
+    presetLockUntil = Date.now() + ms;
+    document.querySelectorAll(".preset-btn").forEach(function (btn) { btn.disabled = true; });
+    setTimeout(function () {
+      if (Date.now() >= presetLockUntil) {
+        document.querySelectorAll(".preset-btn").forEach(function (btn) { btn.disabled = false; });
+      }
+    }, ms);
+  }
+
+  async function sendPresetEmail(amount) {
+    if (Date.now() < presetLockUntil) return;
+    var words = PRESET_WORDS[amount];
+    if (!words) return;
+    lockPresetButtons(60000);
+    if (!state.api) {
+      showStatus(els.formStatus, "The email could not be sent right now. No email was sent.", "is-error");
+      return;
+    }
+    try {
+      var res = await fetch("/api/request-preset-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kid: state.kid, amount: amount })
+      });
+      var data = {};
+      try { data = await res.json(); } catch (err) { data = {}; }
+      if (res.status === 429) {
+        showStatus(els.formStatus, data.message || "Please wait a minute before sending another request.", "is-error");
+        return;
+      }
+      if (!res.ok || !data.ok || data.mode !== "live") {
+        showStatus(els.formStatus, data.message || "The email could not be sent right now.", "is-error");
+        return;
+      }
+      showStatus(els.formStatus, data.message || ("Your dad has been emailed your request for " + words + " dollars."), "is-ok");
+    } catch (err) {
+      showStatus(els.formStatus, "The email could not be sent right now.", "is-error");
+    }
+  }
+
   async function saveWishlist(nextItems, note) {
     state.wishlist = nextItems;
     persistLocalWishlist();
@@ -1216,7 +1260,7 @@
     document.querySelectorAll(".preset-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var amount = Number(btn.getAttribute("data-amount"));
-        sendRequest("text", { amount: amount, message: "Dad, I need $" + amount });
+        sendPresetEmail(amount);
       });
     });
 

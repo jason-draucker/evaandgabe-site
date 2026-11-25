@@ -469,6 +469,79 @@ app.post("/api/request-email", async function (req, res) {
 });
 
 
+
+const PRESET_AMOUNT_WORDS = { 5: "five", 10: "ten", 20: "twenty", 50: "fifty" };
+const presetEmailCooldown = new Map();
+
+function presetCooldownMs() {
+  const raw = Number(process.env.PRESET_EMAIL_COOLDOWN_MS);
+  return Number.isFinite(raw) && raw >= 0 ? raw : 60000;
+}
+
+function denverStamp(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Denver",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short"
+  }).format(date);
+}
+
+app.post("/api/request-preset-email", async function (req, res) {
+  const body = req.body || {};
+  if (!validKid(body.kid)) {
+    return res.status(400).json({ ok: false, message: "Please choose Eva or Gabe." });
+  }
+  const amount = Number(body.amount);
+  const words = PRESET_AMOUNT_WORDS[amount];
+  if (!words) {
+    return res.status(400).json({ ok: false, message: "That amount is not allowed." });
+  }
+
+  const last = presetEmailCooldown.get(body.kid) || 0;
+  const wait = presetCooldownMs() - (Date.now() - last);
+  if (wait > 0) {
+    return res.status(429).json({
+      ok: false,
+      message: "Please wait a minute before sending another request."
+    });
+  }
+
+  const who = kidName(body.kid);
+  const subject = who + " is asking for $" + amount;
+  const sentAt = denverStamp(new Date());
+  const text = who + " is asking for $" + amount + " (" + words + " dollars) via evaandgabe.com.\nSent at " + sentAt + ".\n";
+  const successMessage = "Your dad has been emailed your request for " + words + " dollars.";
+
+  if (!emailConfigured()) {
+    console.log("request-preset-email: demo mode. No email sent.");
+    return res.json({
+      ok: true,
+      mode: "demo",
+      message: "The email could not be sent right now. No email was sent."
+    });
+  }
+
+  try {
+    await sendEmail({
+      to: process.env.JASON_EMAIL.trim(),
+      subject: subject,
+      text: text
+    });
+    presetEmailCooldown.set(body.kid, Date.now());
+    console.log("request-preset-email: live send reported success.");
+    return res.json({ ok: true, mode: "live", message: successMessage });
+  } catch (err) {
+    console.log("request-preset-email: send failed. No details logged.");
+    return res.status(502).json({ ok: false, message: "The email could not be sent right now." });
+  }
+});
+
+
 app.get("/api/updates", function (req, res) {
   res.json(loadUpdates());
 });
